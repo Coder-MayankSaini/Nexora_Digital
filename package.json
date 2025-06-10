@@ -61,6 +61,7 @@
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.11.2",
     "@shadcn/ui": "^0.0.4"
   }
 }
