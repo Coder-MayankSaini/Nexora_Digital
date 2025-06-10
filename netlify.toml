@@ -1,5 +1,12 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  # Ignore warning messages during build process
+  ignore_warnings = true
 [[plugins]]
-  package = "@netlify/plugin-nextjs" 
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  # Configure Node.js version
+  NODE_VERSION = "16"
+  NPM_FLAGS = "--legacy-peer-deps" 
