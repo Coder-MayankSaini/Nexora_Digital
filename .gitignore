@@ -3,6 +3,9 @@
 /.pnp
 .pnp.js
 
+# SWC binaries (too large for GitHub)
+**/node_modules/@next/swc-*
+
 # testing
 /coverage
 
