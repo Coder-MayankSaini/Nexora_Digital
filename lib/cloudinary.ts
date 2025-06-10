@@ -1,3 +1,5 @@
+'use client';
+
 import { v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({
@@ -8,6 +10,7 @@ cloudinary.config({
 
 export default cloudinary;
 
+// We'll use browser-based upload for client components
 export const uploadToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
