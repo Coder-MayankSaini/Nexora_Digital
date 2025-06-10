@@ -7,6 +7,6 @@
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  # Configure Node.js version
-  NODE_VERSION = "16"
+  # Configure Node.js version (updated to meet package requirements)
+  NODE_VERSION = "18.18.0"
   NPM_FLAGS = "--legacy-peer-deps" 
