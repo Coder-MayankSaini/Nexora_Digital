@@ -1,32 +1,6 @@
 {
   "version": 3,
-  "middleware": {
-    "/": {
-      "files": [
-        "server/edge-runtime-webpack.js",
-        "server/middleware.js"
-      ],
-      "name": "middleware",
-      "page": "/",
-      "matchers": [
-        {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?\\/dashboard(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\.json)?[\\/#\\?]?$",
-          "originalSource": "/dashboard/:path*"
-        }
-      ],
-      "wasm": [],
-      "assets": [],
-      "env": {
-        "__NEXT_BUILD_ID": "a92rzzqPrayRT-GHmYVvH",
-        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "EgZh3e8mMUdEtnZTSu87Wjny839AX1jBUrYj784l1M4=",
-        "__NEXT_PREVIEW_MODE_ID": "819a4bc3ce56c51e04d574c99b08c346",
-        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "0e7fb1f8d5e88ec17945e31b1fd4f91eccd96527d42a0d35c4ecb1439f047534",
-        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "85135151c08e6ae2626d8c046bab43108d7863353251b1028741c0d1c66ac9c1"
-      }
-    }
-  },
+  "middleware": {},
   "functions": {},
-  "sortedMiddleware": [
-    "/"
-  ]
+  "sortedMiddleware": []
 }
