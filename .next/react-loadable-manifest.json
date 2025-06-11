@@ -1,1 +1,112 @@
-{}
+{
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/app/dashboard/admin/page": {
+    "id": 94655,
+    "files": [
+      "static/chunks/4655.a7b4f512b6579661.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/app/dashboard/editor/page": {
+    "id": 49594,
+    "files": [
+      "static/chunks/e37a0b60-95f468b914f7d4a4.js",
+      "static/chunks/aaea2bcf-fd009350e6f90d73.js",
+      "static/chunks/70e0d97a-e9f2507dda2ac4a0.js",
+      "static/chunks/54a60aa6-155bcf7b948d2360.js",
+      "static/chunks/3515-a4b2724895b9a52a.js",
+      "static/chunks/7694-501632a66d0d97bf.js",
+      "static/chunks/1289-79bded080584145d.js",
+      "static/chunks/1993-503b056449096aa1.js",
+      "static/chunks/6702-ec8159745326d898.js",
+      "static/chunks/139-3860132e96680d8f.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/app/dashboard/page": {
+    "id": 90601,
+    "files": []
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/animations/ScrollParallax": {
+    "id": 91003,
+    "files": [
+      "static/chunks/1003.5844976d685e840d.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/animations/ScrollReveal": {
+    "id": 97673,
+    "files": [
+      "static/chunks/7673.ca1ef2efff291f1c.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/animations/StaggerReveal": {
+    "id": 13801,
+    "files": [
+      "static/chunks/3801.db7cc113c32e189a.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/dashboard/ContentPreviewTable": {
+    "id": 46540,
+    "files": [
+      "static/chunks/5852.ca4283ae1796a2be.js",
+      "static/chunks/6540.8b636cf560de459a.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/dashboard/QuickAccessPanel": {
+    "id": 46731,
+    "files": [
+      "static/chunks/6731.a4ca14bac8785848.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/dashboard/ResponsiveSidebar": {
+    "id": 7898,
+    "files": [
+      "static/chunks/3515-a4b2724895b9a52a.js",
+      "static/chunks/5320-7ed0c7609d357a69.js",
+      "static/chunks/7898.aa8f53ffb7ac6c46.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/dashboard/StatsOverview": {
+    "id": 60265,
+    "files": [
+      "static/chunks/265.bd5b3f4bd8e788f3.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/editor/FeaturedImageUpload": {
+    "id": 12471,
+    "files": [
+      "static/chunks/e37a0b60-95f468b914f7d4a4.js",
+      "static/chunks/aaea2bcf-fd009350e6f90d73.js",
+      "static/chunks/7694-501632a66d0d97bf.js",
+      "static/chunks/824.807e095c573bf847.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/editor/RichTextEditor": {
+    "id": 81739,
+    "files": [
+      "static/chunks/e37a0b60-95f468b914f7d4a4.js",
+      "static/chunks/aaea2bcf-fd009350e6f90d73.js",
+      "static/chunks/70e0d97a-e9f2507dda2ac4a0.js",
+      "static/chunks/54a60aa6-155bcf7b948d2360.js",
+      "static/chunks/7694-501632a66d0d97bf.js",
+      "static/chunks/1289-79bded080584145d.js",
+      "static/chunks/2427.06582d24b21a1e7a.js"
+    ]
+  },
+  "components\\dynamic\\DynamicDashboardComponents.tsx -> @/components/editor/SEOMetaFields": {
+    "id": 56702,
+    "files": [
+      "static/chunks/6702-ec8159745326d898.js",
+      "static/chunks/5368.5cc2beb53d344f4b.js"
+    ]
+  },
+  "node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": 90472,
+    "files": [
+      "static/chunks/472.2c08b965bd9148e2.js"
+    ]
+  },
+  "node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": 99341,
+    "files": [
+      "static/chunks/9341.a5e04b1003bfe050.js"
+    ]
+  }
+}

@@ -1,12 +1,13 @@
+import { NextAuthOptions } from "next-auth"
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -19,19 +20,13 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }: any) {
-      // Add user role to session
+    async session({ session, user }) {
+      // Add user id and role to session
       if (session?.user) {
-        session.user.id = user.id;
-        session.user.role = user.role;
+        session.user.id = user.id
+        session.user.role = user.role
       }
-      return session;
-    },
-    async jwt({ token, user }: any) {
-      if (user) {
-        token.role = user.role;
-      }
-      return token;
+      return session
     },
   },
   pages: {

@@ -36,7 +36,7 @@ export function useAutoSave({
 }: UseAutoSaveOptions) {
   const { session } = useSession();
   const lastSavedData = useRef<string>('');
-  const saveTimeout = useRef<NodeJS.Timeout>();
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const isSaving = useRef(false);
 
   const saveDraft = useCallback(async (draftData: DraftData): Promise<void> => {
