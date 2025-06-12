@@ -1,6 +1,7 @@
 [build]
   command = "chmod +x netlify-deploy.sh && ./netlify-deploy.sh"
   publish = ".next"
+  ignore_warnings = true
 
 [build.environment]
   NEXT_PUBLIC_SITE_URL = "https://nexora-digital.netlify.app"
@@ -15,9 +16,6 @@
 #   from = "/*"
 #   to = "/index.html"
 #   status = 200
-
-# Ignore warning messages during build process
-ignore_warnings = true
 
 # Enable HTTP/2 and performance optimizations
 [[headers]]
