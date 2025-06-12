@@ -52,8 +52,8 @@ NEXTAUTH_SECRET=your-secret-key-here-change-in-production
 NEXTAUTH_URL=http://localhost:3000
 
 # Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id-here
-GOOGLE_CLIENT_SECRET=your-google-client-secret-here
+GOOGLE_CLIENT_ID=1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
 
 # Database
 DATABASE_URL="file:./prisma/dev.db"
@@ -76,6 +76,19 @@ When deploying to production:
 1. Update your environment variables on your hosting platform (e.g., Vercel, Netlify)
 2. Make sure `NEXTAUTH_URL` points to your production URL
 3. Ensure your Google Cloud OAuth settings include your production URLs
+
+## Step 4: Update Redirect URIs for Custom Domain (When Ready)
+
+After you've set up your custom domain with Netlify, you need to update your Google OAuth configuration:
+
+1. Go back to the Google Cloud Console > APIs & Services > Credentials
+2. Select your OAuth 2.0 Client ID
+3. Add additional Authorized redirect URIs:
+   - `https://your-custom-domain.com/api/auth/callback/google`
+4. Save your changes
+5. Update the `NEXTAUTH_URL` environment variable in Netlify to use your custom domain
+
+This ensures authentication works properly when users access your site through your custom domain.
 
 ## Troubleshooting
 
