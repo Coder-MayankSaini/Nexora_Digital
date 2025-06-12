@@ -44,6 +44,15 @@ const testimonials = [
   },
 ];
 
+// Pre-defined positions for background elements to avoid hydration errors
+const backgroundPositions = [
+  { left: '15%', top: '20%' },
+  { left: '75%', top: '65%' },
+  { left: '35%', top: '85%' },
+  { left: '85%', top: '30%' },
+  { left: '55%', top: '10%' },
+];
+
 export default function AnimatedTestimonials() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
@@ -72,16 +81,16 @@ export default function AnimatedTestimonials() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-r from-purple-900 to-blue-900 relative overflow-hidden">
+    <section id="testimonials" className="py-20 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0">
-        {[...Array(5)].map((_, i) => (
+        {backgroundPositions.map((position, i) => (
           <motion.div
             key={i}
             className="absolute w-64 h-64 bg-white/5 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: position.left,
+              top: position.top,
             }}
             animate={{
               x: [0, 30, 0],

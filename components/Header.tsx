@@ -16,6 +16,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hash, setHash] = useState('');
+  const [activeSection, setActiveSection] = useState('');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
   // Handle scroll behavior and hash changes
@@ -27,6 +28,23 @@ export default function Header() {
       
       setScrollProgress(progress);
       setScrolled(offset > 50);
+      
+      // Check which section is currently in view
+      const sections = ['services', 'portfolio', 'testimonials'];
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // If the section is in the viewport (with some buffer for better UX)
+          if (rect.top <= 200 && rect.bottom >= 200) {
+            setActiveSection(section);
+            break;
+          } else if (offset < 100) {
+            // At the top of the page
+            setActiveSection('');
+          }
+        }
+      }
     };
     
     // Get hash on client-side only
@@ -52,17 +70,19 @@ export default function Header() {
   }, []);
 
   const isActive = (path: string) => {
-    if (path === '/') return pathname === '/';
+    if (path === '/') return pathname === '/' && !activeSection && !hash;
     
     if (path.includes('#')) {
       const [basePath, hashValue] = path.split('#');
-      return pathname === '/' && hash === `#${hashValue}`;
+      // Check if we're on the homepage and either the hash matches or the active section matches
+      return pathname === '/' && (hash === `#${hashValue}` || activeSection === hashValue);
     }
     
     return pathname === path || (path !== '/' && pathname?.startsWith(path));
   };
 
   const navLinks = [
+    { href: '/', label: 'Home' },
     { href: '/#services', label: 'Services' },
     { href: '/#portfolio', label: 'Portfolio' },
     { href: '/about', label: 'About' },
@@ -117,6 +137,23 @@ export default function Header() {
     }
   };
 
+  // Function to handle smooth scrolling for hash links
+  const handleHashLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.includes('#') && pathname === '/') {
+      e.preventDefault();
+      const [_, targetId] = href.split('#');
+      const targetElement = document.getElementById(targetId);
+      
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+        // Update the URL without triggering a page reload
+        window.history.pushState(null, '', href);
+        setHash(`#${targetId}`);
+        setActiveSection(targetId);
+      }
+    }
+  };
+
   return (
     <>
       {/* Progress bar */}
@@ -132,7 +169,7 @@ export default function Header() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           scrolled 
-            ? "backdrop-blur-xl bg-white/10 shadow-lg border-b border-white/10" 
+            ? "backdrop-blur-xl bg-white/80 shadow-lg border-b border-gray-200" 
             : "backdrop-blur-md bg-white/5 border-b border-white/5"
         )}
       >
@@ -144,7 +181,10 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="relative flex items-center gap-2 group">
               <div className="relative">
-                <Sparkles className="w-6 h-6 text-purple-400" />
+                <Sparkles className={cn(
+                  "w-6 h-6",
+                  scrolled ? "text-purple-600" : "text-purple-400"
+                )} />
               </div>
               
               <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
@@ -176,15 +216,24 @@ export default function Header() {
                     href={link.href} 
                     className={cn(
                       "relative px-4 py-2 rounded-lg transition-all duration-300",
-                      "hover:text-white",
-                      isActive(link.href) ? 'text-white' : 'text-white/70'
+                      scrolled
+                        ? isActive(link.href) 
+                          ? "text-purple-700 font-medium" 
+                          : "text-gray-700 hover:text-purple-700"
+                        : isActive(link.href) 
+                          ? "text-white" 
+                          : "text-white/70 hover:text-white"
                     )}
+                    onClick={(e) => handleHashLinkClick(e, link.href)}
                   >
                     {/* Hover background */}
                     <AnimatePresence>
                       {hoveredIndex === index && (
                         <motion.span
-                          className="absolute inset-0 bg-white/10 rounded-lg"
+                          className={cn(
+                            "absolute inset-0 rounded-lg",
+                            scrolled ? "bg-gray-100" : "bg-white/10"
+                          )}
                           layoutId="navHover"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -198,7 +247,12 @@ export default function Header() {
                     {isActive(link.href) && (
                       <motion.span
                         layoutId="activeNav"
-                        className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg"
+                        className={cn(
+                          "absolute inset-0 rounded-lg",
+                          scrolled 
+                            ? "bg-purple-100" 
+                            : "bg-gradient-to-r from-purple-600/20 to-blue-600/20"
+                        )}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />
                     )}
@@ -219,22 +273,25 @@ export default function Header() {
                 animate="animate"
                 className="ml-4"
               >
-                <AuthButton />
+                <AuthButton scrolled={scrolled} />
               </motion.div>
             </nav>
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center gap-3">
-              <AuthButton />
+              <AuthButton scrolled={scrolled} />
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-full bg-white/10"
+                className={cn(
+                  "p-2 rounded-full",
+                  scrolled ? "bg-gray-100 text-gray-700" : "bg-white/10 text-white"
+                )}
                 aria-label="Toggle Menu"
               >
                 {isOpen ? (
-                  <X size={20} className="text-white" />
+                  <X size={20} className="w-5 h-5" />
                 ) : (
-                  <Menu size={20} className="text-white" />
+                  <Menu size={20} className="w-5 h-5" />
                 )}
               </button>
             </div>
@@ -261,7 +318,12 @@ export default function Header() {
               initial="closed"
               animate="open"
               exit="closed"
-              className="fixed top-[60px] left-4 right-4 bg-white/10 backdrop-blur-xl rounded-2xl shadow-xl z-40 md:hidden border border-white/20 overflow-hidden"
+              className={cn(
+                "fixed top-[60px] left-4 right-4 rounded-2xl shadow-xl z-40 md:hidden border overflow-hidden",
+                scrolled 
+                  ? "bg-white/90 backdrop-blur-xl border-gray-200" 
+                  : "bg-white/10 backdrop-blur-xl border-white/20"
+              )}
             >
               <nav className="relative p-4 flex flex-col gap-1">
                 {navLinks.map((link, index) => (
@@ -272,19 +334,28 @@ export default function Header() {
                   >
                     <Link
                       href={link.href}
-                      onClick={() => setIsOpen(false)}
+                      onClick={(e) => {
+                        setIsOpen(false);
+                        handleHashLinkClick(e, link.href);
+                      }}
                       className={cn(
                         "block py-3 px-4 rounded-lg transition-colors",
-                        "hover:bg-white/10",
-                        isActive(link.href) 
-                          ? 'text-white bg-white/10 font-medium' 
-                          : 'text-white/80'
+                        scrolled
+                          ? isActive(link.href)
+                            ? "text-purple-700 bg-purple-50 font-medium"
+                            : "text-gray-700 hover:bg-gray-50"
+                          : isActive(link.href) 
+                            ? "text-white bg-white/10 font-medium" 
+                            : "text-white/80 hover:bg-white/10"
                       )}
                     >
                       <span className="flex items-center justify-between">
                         {link.label}
                         {isActive(link.href) && (
-                          <span className="w-2 h-2 bg-white rounded-full" />
+                          <span className={cn(
+                            "w-2 h-2 rounded-full",
+                            scrolled ? "bg-purple-500" : "bg-white"
+                          )} />
                         )}
                       </span>
                     </Link>
