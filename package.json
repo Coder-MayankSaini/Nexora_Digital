@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:setup": "node setup-database.js",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
