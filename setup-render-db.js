@@ -12,8 +12,8 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-// ======== REPLACE THIS WITH YOUR ACTUAL RENDER POSTGRESQL URL ========
-const RENDER_POSTGRES_URL = "postgres://your_username:your_password@your-host.render.com:5432/your_database";
+// ======== YOUR RENDER POSTGRESQL URL ========
+const RENDER_POSTGRES_URL = "postgresql://nexoradb_user:AVKkt3a6MdiumoEWMymu9StobW2WvCUO@dpg-d15arc63jp1c73fm8nag-a.singapore-postgres.render.com/nexoradb";
 // ====================================================================
 
 // Check if URL is still the placeholder
