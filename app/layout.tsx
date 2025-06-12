@@ -2,6 +2,7 @@ import '@/app/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SessionProvider from '@/components/auth/SessionProvider'
+import HydrationFix from '@/components/HydrationFix'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -25,6 +26,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <SessionProvider>
+          <HydrationFix />
           {children}
         </SessionProvider>
       </body>
