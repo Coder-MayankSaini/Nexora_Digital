@@ -7,7 +7,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:setup": "node setup-database.js",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -66,5 +67,10 @@
     "@netlify/plugin-nextjs": "^5.11.2",
     "@shadcn/ui": "^0.0.4",
     "prisma": "^6.9.0"
+  },
+  "overrides": {
+    "next-auth": {
+      "next": "^15.3.3"
+    }
   }
 }

@@ -4,9 +4,9 @@
 
 echo "🚀 Starting Netlify deployment process..."
 
-# Install dependencies
+# Install dependencies with legacy-peer-deps to resolve dependency conflicts
 echo "📦 Installing dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 # Generate Prisma client
 echo "🔄 Generating Prisma client..."
@@ -19,6 +19,6 @@ npx prisma db push --accept-data-loss
 
 # Build Next.js app
 echo "🏗️ Building Next.js application..."
-next build
+npx next build
 
 echo "✅ Deployment preparation complete!" 

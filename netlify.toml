@@ -5,6 +5,7 @@
 [build.environment]
   NEXT_PUBLIC_SITE_URL = "https://nexora-digital.netlify.app"
   NODE_VERSION = "18.18.0"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
