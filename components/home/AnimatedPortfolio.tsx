@@ -105,7 +105,7 @@ export default function AnimatedPortfolio() {
   };
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section id="portfolio" className="py-20 relative overflow-hidden">
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <motion.div

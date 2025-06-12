@@ -1,100 +1,79 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Suspense } from 'react';
-
-function AuthErrorContent() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get('error');
-
-  const getErrorMessage = (error: string | null): { title: string; description: string } => {
-    switch (error) {
-      case 'Configuration':
-        return {
-          title: 'Configuration Error',
-          description: 'There is a problem with the server configuration.',
-        };
-      case 'AccessDenied':
-        return {
-          title: 'Access Denied',
-          description: 'You do not have permission to sign in.',
-        };
-      case 'Verification':
-        return {
-          title: 'Verification Error',
-          description: 'The verification token has expired or has already been used.',
-        };
-      default:
-        return {
-          title: 'Authentication Error',
-          description: 'An error occurred during authentication. Please try again.',
-        };
-    }
-  };
-
-  const { title, description } = getErrorMessage(error);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full mx-4"
-      >
-        <div className="backdrop-blur-xl bg-white/10 rounded-2xl shadow-2xl border border-white/20 p-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.5 }}
-            className="w-16 h-16 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center"
-          >
-            <AlertCircle className="w-8 h-8 text-red-500" />
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center space-y-4"
-          >
-            <h1 className="text-2xl font-bold text-white">{title}</h1>
-            <p className="text-white/70">{description}</p>
-            
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="pt-4"
-            >
-              <Link href="/login">
-                <Button
-                  variant="outline"
-                  className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  Back to Sign In
-                </Button>
-              </Link>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
+import { AlertCircle } from 'lucide-react';
 
 export default function AuthErrorPage() {
+  const searchParams = useSearchParams();
+  const [errorMessage, setErrorMessage] = useState<string>('An unknown error occurred');
+  
+  useEffect(() => {
+    const error = searchParams?.get('error');
+    if (error) {
+      switch (error) {
+        case 'OAuthSignin':
+          setErrorMessage('Error starting the OAuth sign-in process');
+          break;
+        case 'OAuthCallback':
+          setErrorMessage('Error during the OAuth callback');
+          break;
+        case 'OAuthCreateAccount':
+          setErrorMessage('Could not create user account with OAuth provider');
+          break;
+        case 'EmailCreateAccount':
+          setErrorMessage('Could not create user account with email provider');
+          break;
+        case 'Callback':
+          setErrorMessage('Error in the OAuth callback handler route');
+          break;
+        case 'OAuthAccountNotLinked':
+          setErrorMessage('Email already exists with different provider');
+          break;
+        case 'EmailSignin':
+          setErrorMessage('Error sending the email for sign in');
+          break;
+        case 'CredentialsSignin':
+          setErrorMessage('Invalid credentials');
+          break;
+        case 'SessionRequired':
+          setErrorMessage('You must be signed in to access this page');
+          break;
+        case 'Default':
+        default:
+          setErrorMessage('An unknown error occurred during authentication');
+          break;
+      }
+    }
+  }, [searchParams]);
+
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <Loader2 className="w-8 h-8 animate-spin text-white" />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-purple-900 px-4 py-16">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
+        <div className="flex flex-col items-center">
+          <div className="mb-4 rounded-full bg-red-100 p-3">
+            <AlertCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">Authentication Error</h1>
+          <p className="mb-6 text-center text-gray-600">{errorMessage}</p>
+          
+          <div className="mt-4 flex space-x-4">
+            <Link
+              href="/login"
+              className="rounded-md bg-purple-600 px-6 py-2 text-white hover:bg-purple-700"
+            >
+              Try Again
+            </Link>
+            <Link
+              href="/"
+              className="rounded-md border border-gray-300 px-6 py-2 text-gray-700 hover:bg-gray-50"
+            >
+              Go Home
+            </Link>
+          </div>
+        </div>
       </div>
-    }>
-      <AuthErrorContent />
-    </Suspense>
+    </div>
   );
 } 

@@ -89,7 +89,7 @@ export default function AnimatedServices() {
   };
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section id="services" className="py-20 relative overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-blue-50/50" />
       
