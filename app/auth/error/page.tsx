@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle } from 'lucide-react';
 
-export default function AuthErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string>('An unknown error occurred');
   
@@ -75,5 +75,25 @@ export default function AuthErrorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-purple-900 px-4 py-16">
+        <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
+          <div className="flex flex-col items-center">
+            <div className="mb-4 rounded-full bg-red-100 p-3">
+              <AlertCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">Authentication Error</h1>
+            <p className="mb-6 text-center text-gray-600">Loading error details...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ErrorContent />
+    </Suspense>
   );
 } 
