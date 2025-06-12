@@ -9,19 +9,19 @@ const envPath = path.join(process.cwd(), '.env.local');
 if (!fs.existsSync(envPath)) {
   console.log('Creating .env.local file...');
   const envContent = `# NextAuth.js Configuration
-NEXTAUTH_SECRET=your-secret-key-here-change-in-production
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=b3b4b07f-405b-49df-936b-0794733a6fbe
+NEXTAUTH_URL=https://nexoradigital.netlify.app
 
 # Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CLIENT_ID=1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
 
 # GitHub OAuth
 GITHUB_CLIENT_ID=your-github-client-id
 GITHUB_CLIENT_SECRET=your-github-client-secret
 
 # Database
-DATABASE_URL="file:./prisma/dev.db"
+DATABASE_URL="postgresql://nexoradb_user:AVKkt3a6MdiumoEWMymu9StobW2WvCUO@dpg-d15arc63jp1c73fm8nag-a.singapore-postgres.render.com/nexoradb"
 `;
   fs.writeFileSync(envPath, envContent);
   console.log('Created .env.local file with default configuration');

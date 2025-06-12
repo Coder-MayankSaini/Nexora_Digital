@@ -11,9 +11,9 @@ console.log('Site settings > Environment variables\n');
 
 console.log('DATABASE_URL=postgresql://nexoradb_user:AVKkt3a6MdiumoEWMymu9StobW2WvCUO@dpg-d15arc63jp1c73fm8nag-a.singapore-postgres.render.com/nexoradb');
 console.log('NEXTAUTH_URL=https://nexoradigital.netlify.app');
-console.log('NEXTAUTH_SECRET=generate-a-strong-secret-key');
-console.log('GOOGLE_CLIENT_ID=your-google-client-id');
-console.log('GOOGLE_CLIENT_SECRET=your-google-client-secret');
+console.log('NEXTAUTH_SECRET=b3b4b07f-405b-49df-936b-0794733a6fbe');
+console.log('GOOGLE_CLIENT_ID=1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com');
+console.log('GOOGLE_CLIENT_SECRET=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');
 
 console.log('\n=== TROUBLESHOOTING DATABASE CONNECTION ===\n');
 console.log('1. Make sure your Render database is active and running');

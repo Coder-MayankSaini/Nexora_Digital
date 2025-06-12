@@ -45,11 +45,11 @@ This guide provides step-by-step instructions for deploying your Next.js applica
 4. **Set Up Environment Variables**:
    - Go to Site settings > Environment variables
    - Add the following variables:
-     - `NEXTAUTH_URL`: Set to `https://your-custom-domain.com` if you have a custom domain, or temporarily use `https://nexora-digital.netlify.app` (your Netlify URL)
-     - `NEXTAUTH_SECRET`: Generate a secure secret (you can use `openssl rand -base64 32` in terminal)
-     - `DATABASE_URL`: Paste the PostgreSQL connection string from Render
-     - `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
-     - `GOOGLE_CLIENT_SECRET`: Your Google OAuth client secret
+     - `NEXTAUTH_URL`: Set to `https://nexoradigital.netlify.app`
+     - `NEXTAUTH_SECRET`: Set to `b3b4b07f-405b-49df-936b-0794733a6fbe`
+     - `DATABASE_URL`: `postgresql://nexoradb_user:AVKkt3a6MdiumoEWMymu9StobW2WvCUO@dpg-d15arc63jp1c73fm8nag-a.singapore-postgres.render.com/nexoradb`
+     - `GOOGLE_CLIENT_ID`: `1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com`
+     - `GOOGLE_CLIENT_SECRET`: `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`
    
    **Important**: When you later connect your custom domain, remember to update the `NEXTAUTH_URL` environment variable to use your custom domain. Also update your Google OAuth redirect URIs to include the custom domain.
 
