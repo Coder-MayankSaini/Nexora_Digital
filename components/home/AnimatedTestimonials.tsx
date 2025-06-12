@@ -81,7 +81,7 @@ export default function AnimatedTestimonials() {
   };
 
   return (
-    <section id="testimonials" className="py-20 relative overflow-hidden">
+    <section id="testimonials" className="py-20 relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         {backgroundPositions.map((position, i) => (
@@ -116,13 +116,13 @@ export default function AnimatedTestimonials() {
           className="text-center mb-16"
         >
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold mb-6 text-white"
+            className="text-4xl md:text-5xl font-bold mb-6 text-white drop-shadow-lg"
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.2 }}
           >
             What Our{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">
+            <span className="bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent font-extrabold">
               Clients Say
             </span>
           </motion.h2>
@@ -130,7 +130,7 @@ export default function AnimatedTestimonials() {
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-xl text-purple-200 max-w-2xl mx-auto"
+            className="text-xl text-gray-200 max-w-2xl mx-auto drop-shadow"
           >
             Don't just take our word for it - hear from our satisfied clients
           </motion.p>
@@ -145,14 +145,14 @@ export default function AnimatedTestimonials() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8 md:p-12"
+              className="bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl p-8 md:p-12 shadow-xl"
             >
               {/* Quote Icon */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.2, type: "spring" }}
-                className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-6"
+                className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-6 shadow-lg"
               >
                 <Quote className="w-8 h-8 text-white" />
               </motion.div>
