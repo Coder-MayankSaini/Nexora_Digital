@@ -3,6 +3,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AnimatedCTA() {
   const ref = useRef(null);
@@ -79,62 +80,45 @@ export default function AnimatedCTA() {
             web solutions that drive results and exceed expectations.
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            className="flex justify-center items-center"
           >
-            {/* Primary Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full overflow-hidden shadow-lg"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Start Your Project
+            {/* Consultation Button */}
+            <Link href="/contact">
+              <motion.button
+                whileHover={{ 
+                  scale: 1.05,
+                  backgroundColor: "rgba(124, 58, 237, 1)",
+                }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full transition-all duration-300 shadow-lg flex items-center gap-2"
+              >
+                Schedule Consultation
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
                   <ArrowRight className="w-5 h-5" />
                 </motion.span>
-              </span>
-              
-              {/* Animated background gradient */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: 0 }}
-                transition={{ duration: 0.3 }}
-              />
-              
-              {/* Pulse effect */}
-              <motion.div
-                className="absolute inset-0 bg-white"
-                animate={{
-                  scale: [1, 2],
-                  opacity: [0.3, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                }}
-              />
-            </motion.button>
-
-            {/* Secondary Button */}
-            <motion.button
-              whileHover={{ 
-                scale: 1.05,
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-full transition-all duration-300 backdrop-blur-sm"
-            >
-              Schedule Consultation
-            </motion.button>
+                
+                {/* Pulse effect */}
+                <motion.div
+                  className="absolute inset-0 bg-white rounded-full"
+                  animate={{
+                    scale: [1, 1.5],
+                    opacity: [0.3, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                />
+              </motion.button>
+            </Link>
           </motion.div>
 
           {/* Animated trust indicators */}

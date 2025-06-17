@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, Variants, useReducedMotion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowDown } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AnimatedHero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -148,56 +149,46 @@ export default function AnimatedHero() {
           </motion.p>
         </motion.div>
 
-        {/* CTA Buttons */}
+        {/* CTA Button */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex justify-center items-center"
         >
-          <motion.button
-            variants={buttonVariants}
-            whileHover={!shouldReduceMotion ? { 
-              scale: 1.05,
-              boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)"
-            } : {}}
-            whileTap={{ scale: 0.95 }}
-            className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full overflow-hidden"
-          >
-            <span className="relative z-10">Get Started</span>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700"
-              initial={{ x: "-100%" }}
-              whileHover={{ x: 0 }}
-              transition={{ duration: 0.3 }}
-            />
-            {!shouldReduceMotion && (
+          <Link href="/contact">
+            <motion.button
+              variants={buttonVariants}
+              whileHover={!shouldReduceMotion ? { 
+                scale: 1.05,
+                boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)"
+              } : {}}
+              whileTap={{ scale: 0.95 }}
+              className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full overflow-hidden"
+            >
+              <span className="relative z-10">Schedule Consultation</span>
               <motion.div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100"
-                animate={{
-                  background: [
-                    "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                    "radial-gradient(circle at 80% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                    "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute inset-0 bg-gradient-to-r from-purple-700 to-blue-700"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: 0 }}
+                transition={{ duration: 0.3 }}
               />
-            )}
-          </motion.button>
-
-          <motion.button
-            variants={buttonVariants}
-            whileHover={!shouldReduceMotion ? { 
-              scale: 1.05,
-              borderColor: "rgba(255, 255, 255, 0.5)"
-            } : {}}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-full backdrop-blur-sm transition-all duration-300"
-          >
-            Learn More
-          </motion.button>
+              {!shouldReduceMotion && (
+                <motion.div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                  animate={{
+                    background: [
+                      "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                      "radial-gradient(circle at 80% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                      "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              )}
+            </motion.button>
+          </Link>
         </motion.div>
       </motion.div>
 

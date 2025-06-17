@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
+import { motion } from 'framer-motion';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -54,24 +55,44 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`transition-colors ${
-                isActive(link.href)
-                  ? isScrolled
-                    ? 'text-purple-600 font-medium'
-                    : 'text-white font-medium'
-                  : isScrolled
-                  ? 'text-gray-700 hover:text-purple-600'
-                  : 'text-white/80 hover:text-white'
-              }`}
+              className="relative"
             >
-              {link.label}
+              <motion.span
+                className={`transition-colors ${
+                  isActive(link.href)
+                    ? isScrolled
+                      ? 'text-purple-600 font-medium'
+                      : 'text-white font-medium'
+                    : isScrolled
+                    ? 'text-gray-700 hover:text-purple-600'
+                    : 'text-white/80 hover:text-white'
+                }`}
+                whileHover={{ 
+                  scale: 1.05 
+                }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300 
+                }}
+              >
+                {link.label}
+                {isActive(link.href) && (
+                  <motion.div
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-current"
+                    layoutId="activeNavIndicator"
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+              </motion.span>
             </Link>
           ))}
 
-          {/* Auth Button */}
+          {/* Auth Button - Dashboard & Signout only (removed Sign In) */}
           {status === 'loading' ? (
             <div className="w-20 h-8 bg-gray-200 animate-pulse rounded-md"></div>
-          ) : session ? (
+          ) : session && (
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
@@ -94,17 +115,6 @@ export default function Header() {
                 Sign Out
               </button>
             </div>
-          ) : (
-            <Link
-              href="/login"
-              className={`px-4 py-2 rounded-md transition-colors ${
-                isScrolled
-                  ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20'
-              }`}
-            >
-              Sign In
-            </Link>
           )}
         </nav>
 
@@ -130,20 +140,33 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`py-2 ${
-                  isActive(link.href)
+                className="relative py-2"
+              >
+                <motion.span
+                  className={isActive(link.href)
                     ? 'text-purple-600 font-medium'
                     : 'text-gray-700 hover:text-purple-600'
-                }`}
-              >
-                {link.label}
+                  }
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  {link.label}
+                  {isActive(link.href) && (
+                    <motion.div
+                      className="absolute -bottom-1 left-0 h-0.5 bg-purple-600"
+                      layoutId="activeMobileNavIndicator"
+                      animate={{ width: '50%' }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                </motion.span>
               </Link>
             ))}
             
-            {/* Auth Button */}
+            {/* Auth Button - Only show Dashboard and Sign Out (removed Sign In) */}
             {status === 'loading' ? (
               <div className="w-full h-10 bg-gray-200 animate-pulse rounded-md"></div>
-            ) : session ? (
+            ) : session && (
               <div className="flex flex-col space-y-2">
                 <Link
                   href="/dashboard"
@@ -158,13 +181,6 @@ export default function Header() {
                   Sign Out
                 </button>
               </div>
-            ) : (
-              <Link
-                href="/login"
-                className="py-2 px-4 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-center"
-              >
-                Sign In
-              </Link>
             )}
           </nav>
         </div>
