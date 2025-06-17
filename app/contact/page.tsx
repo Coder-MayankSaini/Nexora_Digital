@@ -41,7 +41,8 @@ const itemVariants = {
 type ContactFormData = {
   name: string;
   email: string;
-  subject: string;
+  phoneNumber: string;
+  companyName: string;
   message: string;
 };
 
@@ -144,16 +145,27 @@ export default function ContactPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="subject" className="text-gray-700">Subject</Label>
+                      <Label htmlFor="phoneNumber" className="text-gray-700">Phone Number</Label>
                       <Input
-                        id="subject"
-                        placeholder="What is this regarding?"
-                        className={`transition-all duration-200 hover:border-purple-400 focus:border-purple-500 ${errors.subject ? 'border-red-500' : ''}`}
-                        {...register('subject', { required: 'Subject is required' })}
+                        id="phoneNumber"
+                        type="tel"
+                        placeholder="Your phone number"
+                        className={`transition-all duration-200 hover:border-purple-400 focus:border-purple-500 ${errors.phoneNumber ? 'border-red-500' : ''}`}
+                        {...register('phoneNumber', { required: 'Phone number is required' })}
                       />
-                      {errors.subject && (
-                        <p className="text-red-500 text-sm mt-1">{errors.subject.message}</p>
+                      {errors.phoneNumber && (
+                        <p className="text-red-500 text-sm mt-1">{errors.phoneNumber.message}</p>
                       )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName" className="text-gray-700">Company Name <span className="text-gray-400 text-sm">(Optional)</span></Label>
+                      <Input
+                        id="companyName"
+                        placeholder="Your company name"
+                        className="transition-all duration-200 hover:border-purple-400 focus:border-purple-500"
+                        {...register('companyName')}
+                      />
                     </div>
                     
                     <div className="space-y-2">
@@ -217,8 +229,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold text-gray-800">Email Us</h3>
                       <p className="text-gray-600">
-                        <Link href="mailto:hello@nexoradigital.com" className="text-purple-600 hover:text-purple-700 transition-colors">
-                          hello@nexoradigital.com
+                        <Link href="mailto:marketing.nexoradigital@gmail.com" className="text-purple-600 hover:text-purple-700 transition-colors">
+                          marketing.nexoradigital@gmail.com
                         </Link>
                       </p>
                       <p className="text-gray-500 text-sm mt-1">
@@ -234,8 +246,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-semibold text-gray-800">Call Us</h3>
                       <p className="text-gray-600">
-                        <Link href="tel:+15551234567" className="text-purple-600 hover:text-purple-700 transition-colors">
-                          +1 (555) 123-4567
+                        <Link href="tel:+918525001313" className="text-purple-600 hover:text-purple-700 transition-colors">
+                          +91-8525001313
                         </Link>
                       </p>
                       <p className="text-gray-500 text-sm mt-1">
