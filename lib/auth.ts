@@ -12,59 +12,82 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || "dummy-client-id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy-client-secret",
     }),
-    // Add credentials provider for testing
+    // Admin credentials provider - ONLY for admin access
     CredentialsProvider({
-      name: "Credentials",
+      name: "Admin Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "username" },
-        password: { label: "Password", type: "password", placeholder: "password" }
+        username: { label: "Username", type: "text", placeholder: "admin username" },
+        password: { label: "Password", type: "password", placeholder: "admin password" }
       },
       async authorize(credentials) {
-        // Check for admin credentials first
-        if (credentials?.username === "admin" && credentials?.password === "adminpassword") {
+        // Only check for admin credentials - NO other users allowed
+        const adminUsername = process.env.ADMIN_USERNAME || "admin";
+        const adminPassword = process.env.ADMIN_PASSWORD || "NexoraAdmin2024!";
+        
+        if (credentials?.username === adminUsername && credentials?.password === adminPassword) {
           return {
             id: "admin-user",
             name: "Administrator",
-            email: "admin@example.com",
+            email: "admin@nexoradigital.live",
             image: "https://ui-avatars.com/api/?name=Admin&background=f97316&color=fff",
             role: "ADMIN"
           }
         }
         
-        // Check for demo user
-        if (credentials?.username === "demo" && credentials?.password === "demo") {
-          // Return a mock user
-          return {
-            id: "demo-user",
-            name: "Demo User",
-            email: "demo@example.com",
-            image: "https://ui-avatars.com/api/?name=Demo+User&background=random",
-            role: "USER"
-          }
-        }
-        return null
+        // Return null for any other credentials - NO OTHER USERS ALLOWED
+        return null;
       }
     })
   ],
   callbacks: {
-    async session({ session, user }) {
-      // Add user id and role to session
-      if (session?.user) {
-        session.user.id = user?.id || "demo-user"
-        session.user.role = user?.role || "USER"
+    async jwt({ token, user }) {
+      // Add role to JWT token
+      if (user) {
+        token.role = user.role;
+        token.id = user.id;
       }
-      return session
+      return token;
+    },
+    async session({ session, token }) {
+      // Add user id and role to session from token
+      if (session?.user && token) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        
+        // Additional security check - only allow ADMIN role
+        if (token.role !== "ADMIN") {
+          throw new Error("Unauthorized access");
+        }
+      }
+      return session;
+    },
+    async signIn({ user }) {
+      // Only allow sign in for admin users
+      return user?.role === "ADMIN";
     },
   },
   pages: {
-    signIn: '/login',
+    signIn: '/admin-login',
     error: '/auth/error',
   },
   session: {
-    strategy: 'jwt', // Use JWT for credentials provider
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   // Add a secret for JWT
   secret: process.env.NEXTAUTH_SECRET || "your-secret-key-here-change-in-production",
+  // Enhanced security
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  }
 }
 
 export default NextAuth(authOptions) 
