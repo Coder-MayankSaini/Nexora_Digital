@@ -8,6 +8,7 @@ import { useSession } from '@/lib/useSession';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { signOut } from 'next-auth/react';
+import NotificationBell from '@/components/dashboard/NotificationBell';
 import {
   BarChart3,
   Settings,
@@ -455,29 +456,13 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
         {/* Footer Actions */}
         <div className="p-6 border-t border-gray-200 space-y-3">
           {/* Notifications */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
-          >
-            <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
-              <Bell className="w-4 h-4" />
+          {notifications && notifications.totalNotifications > 0 && (
+            <div className="w-full">
+              <NotificationBell notifications={notifications} />
             </div>
-            <span className="flex-1 text-left font-medium">Notifications</span>
-            <Badge variant="destructive" className="text-xs">3</Badge>
-          </motion.button>
+          )}
 
-          {/* Help & Support */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
-          >
-            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
-              <Zap className="w-4 h-4" />
-            </div>
-            <span className="flex-1 text-left font-medium">Help & Support</span>
-          </motion.button>
+
 
           {/* Sign Out */}
           <motion.button
@@ -522,10 +507,9 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             </div>
 
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-              </Button>
+              {notifications && notifications.totalNotifications > 0 && (
+                <NotificationBell notifications={notifications} variant="header" />
+              )}
               
               <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
                 {session?.user?.name?.charAt(0).toUpperCase() || 'A'}

@@ -27,48 +27,77 @@ interface NotificationBellProps {
     }>;
     totalNotifications: number;
   } | null;
+  variant?: 'sidebar' | 'header';
 }
 
-export default function NotificationBell({ notifications }: NotificationBellProps) {
+export default function NotificationBell({ notifications, variant = 'sidebar' }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   
   if (!notifications || notifications.totalNotifications === 0) {
     return null;
   }
 
+  const isHeader = variant === 'header';
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="relative bg-white/10 border-white/20 text-white hover:bg-white/20"
+          className={`relative ${isHeader 
+            ? 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 p-2 rounded-lg' 
+            : 'w-full justify-start text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-3 rounded-xl'
+          }`}
         >
-          <motion.div
-            animate={{ 
-              scale: notifications.totalNotifications > 0 ? [1, 1.1, 1] : 1 
-            }}
-            transition={{ 
-              duration: 2, 
-              repeat: Infinity, 
-              repeatType: 'loop' 
-            }}
-          >
-            <Bell className="h-4 w-4 mr-2" />
-          </motion.div>
-          Notifications
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="ml-2"
-          >
-            <Badge className="bg-red-500 text-white">
-              {notifications.totalNotifications}
-            </Badge>
-          </motion.div>
+          {isHeader ? (
+            <motion.div
+              animate={{ 
+                scale: notifications.totalNotifications > 0 ? [1, 1.1, 1] : 1 
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity, 
+                repeatType: 'loop' 
+              }}
+            >
+              <Bell className="h-5 w-5" />
+            </motion.div>
+          ) : (
+            <>
+              <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
+                <motion.div
+                  animate={{ 
+                    scale: notifications.totalNotifications > 0 ? [1, 1.1, 1] : 1 
+                  }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity, 
+                    repeatType: 'loop' 
+                  }}
+                >
+                  <Bell className="h-4 w-4" />
+                </motion.div>
+              </div>
+              <span className="flex-1 text-left font-medium">Notifications</span>
+            </>
+          )}
           
-          {/* Pulsing dot for urgent notifications */}
-          {notifications.newContactSubmissions > 0 && (
+          {isHeader ? (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+          ) : (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+            >
+              <Badge variant="destructive" className="text-xs">
+                {notifications.totalNotifications}
+              </Badge>
+            </motion.div>
+          )}
+          
+          {/* Pulsing dot for urgent notifications - only for sidebar */}
+          {!isHeader && notifications.newContactSubmissions > 0 && (
             <motion.div
               className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"
               animate={{ 
