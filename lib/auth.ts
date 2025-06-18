@@ -14,13 +14,24 @@ export const authOptions: NextAuthOptions = {
     }),
     // Add credentials provider for testing
     CredentialsProvider({
-      name: "Demo Account",
+      name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "demo" },
-        password: { label: "Password", type: "password", placeholder: "demo" }
+        username: { label: "Username", type: "text", placeholder: "username" },
+        password: { label: "Password", type: "password", placeholder: "password" }
       },
       async authorize(credentials) {
-        // This is a demo account - in production, you would validate against your database
+        // Check for admin credentials first
+        if (credentials?.username === "admin" && credentials?.password === "adminpassword") {
+          return {
+            id: "admin-user",
+            name: "Administrator",
+            email: "admin@example.com",
+            image: "https://ui-avatars.com/api/?name=Admin&background=f97316&color=fff",
+            role: "ADMIN"
+          }
+        }
+        
+        // Check for demo user
         if (credentials?.username === "demo" && credentials?.password === "demo") {
           // Return a mock user
           return {

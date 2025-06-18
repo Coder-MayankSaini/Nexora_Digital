@@ -3,16 +3,9 @@ import { NextResponse } from "next/server"
 
 export default withAuth(
   function middleware(req) {
-    // Check if user is trying to access admin routes
-    if (req.nextUrl.pathname.startsWith("/dashboard/admin")) {
+    // Redirect all dashboard access to unauthorized if not an admin
+    if (req.nextUrl.pathname.startsWith("/dashboard")) {
       if (req.nextauth.token?.role !== "ADMIN") {
-        return NextResponse.rewrite(new URL("/dashboard/unauthorized", req.url))
-      }
-    }
-
-    // Check if user is trying to access editor routes
-    if (req.nextUrl.pathname.startsWith("/dashboard/editor")) {
-      if (req.nextauth.token?.role !== "ADMIN" && req.nextauth.token?.role !== "EDITOR") {
         return NextResponse.rewrite(new URL("/dashboard/unauthorized", req.url))
       }
     }

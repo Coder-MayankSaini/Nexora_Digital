@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, ArrowLeft } from 'lucide-react';
+import { Shield, ArrowLeft, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useSession } from '@/lib/useSession';
 
@@ -27,9 +27,9 @@ export default function UnauthorizedPage() {
             >
               <Shield className="h-16 w-16 text-red-500 mx-auto mb-4" />
             </motion.div>
-            <CardTitle className="text-2xl text-red-800">Access Denied</CardTitle>
+            <CardTitle className="text-2xl text-red-800">Admin Access Only</CardTitle>
             <CardDescription className="text-red-600">
-              You don't have permission to access this resource
+              This dashboard is restricted to administrators only
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
@@ -38,20 +38,20 @@ export default function UnauthorizedPage() {
                 <strong>Current Role:</strong> {session?.user?.role || 'No role assigned'}
               </p>
               <p className="text-xs text-gray-600">
-                Contact your administrator to request access to this feature.
+                You need administrator privileges to access this area.
               </p>
             </div>
             
             <div className="flex flex-col gap-2">
-              <Link href="/dashboard">
-                <Button className="w-full" variant="outline">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
+              <Link href="/admin-login">
+                <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Go to Admin Login
                 </Button>
               </Link>
               <Link href="/">
                 <Button className="w-full" variant="ghost">
-                  Go to Homepage
+                  Return to Homepage
                 </Button>
               </Link>
             </div>
