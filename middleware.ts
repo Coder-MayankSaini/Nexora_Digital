@@ -13,7 +13,7 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Protect all dashboard routes
+        // Protect all dashboard routes - require authentication
         if (req.nextUrl.pathname.startsWith("/dashboard")) {
           return !!token
         }
