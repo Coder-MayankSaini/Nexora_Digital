@@ -297,21 +297,14 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
 
         {/* Footer Actions */}
         <div className="p-6 border-t border-gray-200 space-y-3">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-            <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
-              <Bell className="w-4 h-4" />
+          {/* Notifications */}
+          {notifications && notifications.totalNotifications > 0 && (
+            <div className="w-full">
+              <NotificationBell notifications={notifications} />
             </div>
-            <span className="flex-1 text-left font-medium">Notifications</span>
-            <Badge variant="destructive" className="text-xs">3</Badge>
-          </button>
+          )}
 
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
-              <Zap className="w-4 h-4" />
-            </div>
-            <span className="flex-1 text-left font-medium">Help & Support</span>
-          </button>
-
+          {/* Sign Out */}
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-700 hover:text-red-900 hover:bg-red-50 rounded-xl transition-colors"
