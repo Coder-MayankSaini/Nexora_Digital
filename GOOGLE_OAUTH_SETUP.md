@@ -48,8 +48,8 @@ This guide will walk you through the steps to set up Google OAuth for authentica
 
 ```
 # NextAuth.js Configuration
-NEXTAUTH_SECRET=b3b4b07f-405b-49df-936b-0794733a6fbe
-NEXTAUTH_URL=https://nexoradigital.netlify.app
+NEXTAUTH_SECRET=your-nextauth-secret-key
+NEXTAUTH_URL=https://nexoradigital.live
 
 # Google OAuth
 GOOGLE_CLIENT_ID=1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com
@@ -81,11 +81,10 @@ When deploying to production:
 
 After you've set up your custom domain with Netlify, you need to update your Google OAuth configuration:
 
-1. Go back to the Google Cloud Console > APIs & Services > Credentials
-2. Select your OAuth 2.0 Client ID
-3. Add additional Authorized redirect URIs:
-   - `https://your-custom-domain.com/api/auth/callback/google`
-4. Save your changes
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Navigate to "APIs & Services" > "Credentials"
+3. Find and edit your OAuth 2.0 Client ID
+4. Update the Authorized JavaScript origins and Authorized redirect URIs to include your custom domain
 5. Update the `NEXTAUTH_URL` environment variable in Netlify to use your custom domain
 
 This ensures authentication works properly when users access your site through your custom domain.

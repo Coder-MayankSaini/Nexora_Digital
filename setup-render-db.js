@@ -68,8 +68,8 @@ try {
 
   // Make sure NEXTAUTH_URL is set for production
   if (!prodEnvContent.includes("NEXTAUTH_URL=")) {
-    prodEnvContent += "\nNEXTAUTH_URL=https://your-netlify-domain.netlify.app\n";
-    console.log("\x1b[33m⚠ Added placeholder NEXTAUTH_URL. Please update with your actual Netlify domain.\x1b[0m");
+    prodEnvContent += "\nNEXTAUTH_URL=https://nexoradigital.live\n";
+    console.log("\x1b[33m⚠ Added placeholder NEXTAUTH_URL. Please update with your actual domain.\x1b[0m");
   }
 
   // Write updated content back to .env.production.local

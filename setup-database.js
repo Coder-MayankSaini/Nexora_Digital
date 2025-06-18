@@ -10,7 +10,7 @@ if (!fs.existsSync(envPath)) {
   console.log('Creating .env.local file...');
   const envContent = `# NextAuth.js Configuration
 NEXTAUTH_SECRET=b3b4b07f-405b-49df-936b-0794733a6fbe
-NEXTAUTH_URL=https://nexoradigital.netlify.app
+NEXTAUTH_URL=https://nexoradigital.live
 
 # Google OAuth
 GOOGLE_CLIENT_ID=1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com

@@ -45,10 +45,10 @@ This guide provides step-by-step instructions for deploying your Next.js applica
 4. **Set Up Environment Variables**:
    - Go to Site settings > Environment variables
    - Add the following variables:
-     - `NEXTAUTH_URL`: Set to `https://nexoradigital.netlify.app`
-     - `NEXTAUTH_SECRET`: Set to `b3b4b07f-405b-49df-936b-0794733a6fbe`
-     - `DATABASE_URL`: `postgresql://nexoradb_user:AVKkt3a6MdiumoEWMymu9StobW2WvCUO@dpg-d15arc63jp1c73fm8nag-a.singapore-postgres.render.com/nexoradb`
-     - `GOOGLE_CLIENT_ID`: `1096180620718-dmufp3q4i2255t0048akgl1hg5ngfet2.apps.googleusercontent.com`
+     - `NEXTAUTH_URL`: Set to `https://nexoradigital.live`
+     - `NEXTAUTH_SECRET`: A secure random string for session encryption
+     - `DATABASE_URL`: Your Render PostgreSQL connection string (from the Render dashboard)
+     - `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
      - `GOOGLE_CLIENT_SECRET`: `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`
    
    **Important**: When you later connect your custom domain, remember to update the `NEXTAUTH_URL` environment variable to use your custom domain. Also update your Google OAuth redirect URIs to include the custom domain.
@@ -64,8 +64,8 @@ This guide provides step-by-step instructions for deploying your Next.js applica
    - Navigate to your project > "APIs & Services" > "Credentials"
    - Edit your OAuth 2.0 Client ID
    - Add authorized redirect URIs:
-     - `https://your-netlify-domain.netlify.app/api/auth/callback/google`
-     - `https://your-netlify-domain.netlify.app/api/auth/callback`
+     - `https://nexoradigital.live/api/auth/callback/google`
+     - `https://nexoradigital.live/api/auth/callback`
 
 ## Step 4: Verify Deployment
 

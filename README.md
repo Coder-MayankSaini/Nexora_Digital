@@ -46,7 +46,7 @@ npx shadcn@latest add [component-name]
 ## Environment Variables
 
 Make sure to set the following environment variables in your Netlify deployment:
-- `NEXTAUTH_URL`: Your site's URL (e.g., https://nexoradigital.netlify.app)
+- `NEXTAUTH_URL`: Your site's URL (e.g., https://nexoradigital.live)
 - `NEXTAUTH_SECRET`: A strong secret key for NextAuth.js
 - `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET`: Your Google OAuth client secret

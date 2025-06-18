@@ -49,8 +49,8 @@ This guide walks you through the process of connecting your PostgreSQL database 
 1. **Update your `.env.production.local` file** with your Render PostgreSQL URL:
    ```
    DATABASE_URL=postgres://username:password@host:port/database_name
-   NEXTAUTH_URL=https://your-netlify-domain.netlify.app
-   NEXTAUTH_SECRET=your-secret-key
+   NEXTAUTH_URL=https://nexoradigital.live
+   NEXTAUTH_SECRET=your-nextauth-secret
    
    # Google OAuth
    GOOGLE_CLIENT_ID=your-google-client-id

@@ -4,7 +4,7 @@
   ignore_warnings = true
 
 [build.environment]
-  NEXT_PUBLIC_SITE_URL = "https://nexoradigital.netlify.app"
+  NEXT_PUBLIC_SITE_URL = "https://nexoradigital.live"
   NODE_VERSION = "18.18.0"
   NPM_FLAGS = "--legacy-peer-deps"
 
