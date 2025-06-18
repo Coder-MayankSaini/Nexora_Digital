@@ -16,7 +16,11 @@ import {
   CheckCircle,
   Archive,
   RefreshCcw,
-  Loader2
+  Loader2,
+  Trash2,
+  Filter,
+  Search,
+  X
 } from 'lucide-react';
 // import { format } from 'date-fns';
 import {
@@ -24,6 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from '@/components/ui/input';
 
 type ContactSubmission = {
   id: string;
@@ -42,8 +47,12 @@ type ContactSubmission = {
 export default function ContactSubmissionsPage() {
   const { hasRole } = useRequiredRole('ADMIN');
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
+  const [filteredSubmissions, setFilteredSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED'>('ALL');
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchSubmissions() {
@@ -89,6 +98,29 @@ export default function ContactSubmissionsPage() {
     }
   }, [hasRole]);
 
+  // Filter submissions based on search term and status
+  useEffect(() => {
+    let filtered = submissions;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(sub => 
+        sub.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sub.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sub.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sub.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sub.message.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by status
+    if (statusFilter !== 'ALL') {
+      filtered = filtered.filter(sub => sub.status === statusFilter);
+    }
+
+    setFilteredSubmissions(filtered);
+  }, [submissions, searchTerm, statusFilter]);
+
   const updateStatus = async (id: string, status: 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED') => {
     try {
       console.log('Updating status:', { id, status }); // Debug log
@@ -119,6 +151,32 @@ export default function ContactSubmissionsPage() {
       console.error('Error updating status:', err);
       // Show user-friendly error
       setError(`Failed to update status: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const deleteSubmission = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this contact submission? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleteLoading(id);
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete submission: ${response.status} ${errorText}`);
+      }
+
+      // Remove from local state
+      setSubmissions(prev => prev.filter(sub => sub.id !== id));
+    } catch (err) {
+      console.error('Error deleting submission:', err);
+      setError(`Failed to delete submission: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -173,7 +231,7 @@ export default function ContactSubmissionsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex items-center justify-between"
+        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
       >
         <div>
           <h1 className="text-3xl font-bold text-orange-800">Contact Submissions</h1>
@@ -181,19 +239,99 @@ export default function ContactSubmissionsPage() {
             View and manage contact form submissions from your website
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={refreshData}
-          disabled={loading}
-        >
-          {loading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCcw className="mr-2 h-4 w-4" />
-          )}
-          Refresh
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button 
+            variant="outline" 
+            onClick={refreshData}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="mr-2 h-4 w-4" />
+            )}
+            Refresh
+          </Button>
+        </div>
       </motion.div>
+
+      {/* Filters */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 rounded-lg"
+      >
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search by name, email, company, country, or message..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Status:</span>
+          </div>
+          <div className="flex gap-1">
+            {(['ALL', 'NEW', 'READ', 'REPLIED', 'ARCHIVED'] as const).map((status) => (
+              <Button
+                key={status}
+                variant={statusFilter === status ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter(status)}
+                className="text-xs"
+              >
+                                 {status === 'ALL' ? 'All' : status === 'READ' ? 'Read' : status}
+                {status !== 'ALL' && (
+                  <Badge variant="secondary" className="ml-1 text-xs">
+                    {submissions.filter(sub => sub.status === status).length}
+                  </Badge>
+                )}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Results Count */}
+      {!loading && (
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <span>
+            Showing {filteredSubmissions.length} of {submissions.length} submissions
+            {searchTerm && ` for "${searchTerm}"`}
+            {statusFilter !== 'ALL' && ` with status "${statusFilter}"`}
+          </span>
+          {(searchTerm || statusFilter !== 'ALL') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('ALL');
+              }}
+              className="text-xs"
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      )}
 
       {error && (
         <Card className="bg-red-50 border-red-200">
@@ -211,14 +349,14 @@ export default function ContactSubmissionsPage() {
             </Card>
           ))}
         </div>
-      ) : submissions.length > 0 ? (
+      ) : filteredSubmissions.length > 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="space-y-4"
         >
-          {submissions.map((submission) => (
+          {filteredSubmissions.map((submission) => (
             <Card
               key={submission.id}
               className={`overflow-hidden transition-all duration-200 ${
@@ -269,6 +407,21 @@ export default function ContactSubmissionsPage() {
                           >
                             <Archive className="mr-2 h-4 w-4 text-gray-500" />
                             Archive
+                          </Button>
+                          <hr className="my-1" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => deleteSubmission(submission.id)}
+                            disabled={deleteLoading === submission.id}
+                          >
+                            {deleteLoading === submission.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="mr-2 h-4 w-4" />
+                            )}
+                            Delete
                           </Button>
                         </div>
                       </PopoverContent>
@@ -333,10 +486,32 @@ export default function ContactSubmissionsPage() {
         <Card>
           <CardContent className="py-10 text-center">
             <Mail className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-lg text-gray-500">No contact submissions yet</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Submissions will appear here once visitors use your contact form
-            </p>
+            {submissions.length === 0 ? (
+              <>
+                <p className="text-lg text-gray-500">No contact submissions yet</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Submissions will appear here once visitors use your contact form
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg text-gray-500">No submissions match your filters</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Try adjusting your search terms or status filter
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('ALL');
+                  }}
+                  className="mt-3"
+                >
+                  Clear all filters
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

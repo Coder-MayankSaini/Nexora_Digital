@@ -47,4 +47,36 @@ export async function PATCH(
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const { id } = params;
+    
+    // Delete the submission
+    await prisma.contactSubmission.delete({
+      where: { id },
+    });
+    
+    return NextResponse.json({ message: 'Contact submission deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting contact submission:', error);
+    
+    // Handle not found error
+    if (error.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Contact submission not found' },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Failed to delete contact submission' },
+      { status: 500 }
+    );
+  }
 } 
