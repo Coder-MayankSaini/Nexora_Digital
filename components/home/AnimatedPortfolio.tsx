@@ -19,7 +19,7 @@ const projects = [
   {
     id: 2,
     title: 'Financial Dashboard',
-    category: 'UI/UX Design',
+    category: 'Digital Marketing',
     image: 'https://picsum.photos/400/500?random=2',
     description: 'Real-time analytics dashboard for financial data',
     technologies: ['React', 'D3.js', 'TailwindCSS'],
@@ -29,7 +29,7 @@ const projects = [
   {
     id: 3,
     title: 'Mobile Banking App',
-    category: 'Mobile Development',
+    category: 'Web Development',
     image: 'https://picsum.photos/400/400?random=3',
     description: 'Secure banking app with biometric authentication',
     technologies: ['React Native', 'Node.js', 'MongoDB'],
@@ -39,7 +39,7 @@ const projects = [
   {
     id: 4,
     title: 'SaaS Platform',
-    category: 'Full Stack',
+    category: 'Paid Advertising',
     image: 'https://picsum.photos/400/350?random=4',
     description: 'Complete SaaS solution for project management',
     technologies: ['Vue.js', 'Laravel', 'PostgreSQL'],
@@ -49,7 +49,7 @@ const projects = [
   {
     id: 5,
     title: 'Healthcare Portal',
-    category: 'Web Development',
+    category: 'GMB Optimization & Local SEO',
     image: 'https://picsum.photos/400/450?random=5',
     description: 'Patient management system with telemedicine features',
     technologies: ['Angular', 'Express', 'MySQL'],
@@ -59,16 +59,16 @@ const projects = [
   {
     id: 6,
     title: 'AI Content Creator',
-    category: 'AI/ML',
+    category: 'Digital Marketing',
     image: 'https://picsum.photos/400/320?random=6',
-    description: 'AI-powered content generation platform',
-    technologies: ['Python', 'TensorFlow', 'FastAPI'],
+    description: 'Advanced content generation platform with intelligent features',
+    technologies: ['Python', 'React', 'Node.js'],
     color: 'from-indigo-600 to-purple-600',
     height: 'h-68',
   },
 ];
 
-const categories = ['All', 'Web Development', 'UI/UX Design', 'Mobile Development', 'Full Stack', 'AI/ML'];
+const categories = ['All', 'GMB Optimization & Local SEO', 'Digital Marketing', 'Paid Advertising', 'Web Development'];
 
 export default function AnimatedPortfolio() {
   const ref = useRef(null);
@@ -76,8 +76,8 @@ export default function AnimatedPortfolio() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
 
-  const filteredProjects = activeCategory === 'All' 
-    ? projects 
+  const filteredProjects = activeCategory === 'All'
+    ? projects
     : projects.filter(project => project.category === activeCategory);
 
   const containerVariants: Variants = {
