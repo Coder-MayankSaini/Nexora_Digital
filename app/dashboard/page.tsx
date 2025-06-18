@@ -168,18 +168,28 @@ export default function DashboardPage() {
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch real-time dashboard data
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('/api/dashboard/stats');
-      if (response.ok) {
-        const data = await response.json();
-        setDashboardStats(data);
+      const [statsResponse, activityResponse] = await Promise.all([
+        fetch('/api/dashboard/stats'),
+        fetch('/api/dashboard/activity')
+      ]);
+      
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setDashboardStats(statsData);
+      }
+      
+      if (activityResponse.ok) {
+        const activityData = await activityResponse.json();
+        setRecentActivities(activityData);
       }
     } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error);
+      console.error('Failed to fetch dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -289,56 +299,36 @@ export default function DashboardPage() {
       onClick: () => window.location.href = '/dashboard/new-post'
     },
     {
-      icon: BarChart3,
-      label: "View Analytics",
-      description: "Check detailed performance metrics",
-      color: "bg-gradient-to-r from-emerald-500 to-emerald-600",
-      onClick: () => {}
-    },
-    {
-      icon: Settings,
-      label: "Manage Settings",
-      description: "Configure your preferences",
-      color: "bg-gradient-to-r from-purple-500 to-purple-600",
-      onClick: () => {}
-    },
-    {
-      icon: Users,
-      label: "Team Management",
-      description: "Manage users and permissions",
-      color: "bg-gradient-to-r from-orange-500 to-orange-600",
-      onClick: () => {}
-    }
-  ];
-
-  const recentActivities = [
-    {
       icon: FileText,
-      title: "New post published",
-      description: "Advanced React Patterns published successfully",
-      time: "2h ago",
-      color: "bg-blue-500"
+      label: "Manage Posts",
+      description: "View and edit existing content",
+      color: "bg-gradient-to-r from-emerald-500 to-emerald-600",
+      onClick: () => window.location.href = '/dashboard/editor'
     },
     {
       icon: MessageSquare,
-      title: "New comment received",
-      description: "Someone commented on your latest post",
-      time: "4h ago",
-      color: "bg-emerald-500"
+      label: "Contact Submissions", 
+      description: "Review customer inquiries",
+      color: "bg-gradient-to-r from-purple-500 to-purple-600",
+      onClick: () => window.location.href = '/dashboard/contact-submissions'
     },
     {
       icon: Users,
-      title: "New user registered",
-      description: "John Doe joined your platform",
-      time: "6h ago",
-      color: "bg-purple-500"
-    },
+      label: "Admin Panel",
+      description: "System administration tools",
+      color: "bg-gradient-to-r from-orange-500 to-orange-600",
+      onClick: () => window.location.href = '/dashboard/admin'
+    }
+  ];
+
+  // Recent activities are now fetched from API and stored in state
+  const fallbackActivities = [
     {
-      icon: Star,
-      title: "Post featured",
-      description: "Your post was featured on the homepage",
-      time: "1d ago",
-      color: "bg-orange-500"
+      icon: FileText,
+      title: "Welcome to Dashboard",
+      description: "Your activity feed will appear here once you start creating content",
+      time: "now",
+      color: "bg-blue-500"
     }
   ];
 
@@ -416,9 +406,34 @@ export default function DashboardPage() {
             <p className="text-gray-600 mt-1">Track your key metrics and growth</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filter
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={fetchDashboardStats}
+              disabled={loading}
+            >
+              <Activity className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/dashboard/seed', { method: 'POST' });
+                  if (response.ok) {
+                    await fetchDashboardStats(); // Refresh data
+                    alert('Sample data created successfully!');
+                  }
+                } catch (error) {
+                  alert('Failed to create sample data');
+                }
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Add Sample Data
             </Button>
             <Button variant="outline" size="sm" className="gap-2">
               <Download className="h-4 w-4" />
@@ -496,12 +511,27 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
-                {recentActivities.map((activity, index) => (
-                  <ActivityItem
-                    key={index}
-                    {...activity}
-                  />
-                ))}
+                {(recentActivities.length > 0 ? recentActivities : fallbackActivities).map((activity, index) => {
+                  // Map icon strings to actual components
+                  const iconMap: { [key: string]: any } = {
+                    FileText,
+                    MessageSquare,
+                    Users,
+                    Star
+                  };
+                  const IconComponent = iconMap[activity.icon] || FileText;
+                  
+                  return (
+                    <ActivityItem
+                      key={index}
+                      icon={IconComponent}
+                      title={activity.title}
+                      description={activity.description}
+                      time={activity.time}
+                      color={activity.color}
+                    />
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
