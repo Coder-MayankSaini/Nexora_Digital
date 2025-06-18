@@ -91,6 +91,7 @@ export default function ContactSubmissionsPage() {
 
   const updateStatus = async (id: string, status: 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED') => {
     try {
+      console.log('Updating status:', { id, status }); // Debug log
       const response = await fetch(`/api/contact/${id}`, {
         method: 'PATCH',
         headers: {
@@ -100,8 +101,13 @@ export default function ContactSubmissionsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update status');
+        const errorText = await response.text();
+        console.error('API Error:', errorText);
+        throw new Error(`Failed to update status: ${response.status} ${errorText}`);
       }
+
+      const updatedSubmission = await response.json();
+      console.log('Status updated successfully:', updatedSubmission); // Debug log
 
       // Update local state
       setSubmissions(prev => 
@@ -111,6 +117,8 @@ export default function ContactSubmissionsPage() {
       );
     } catch (err) {
       console.error('Error updating status:', err);
+      // Show user-friendly error
+      setError(`Failed to update status: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
