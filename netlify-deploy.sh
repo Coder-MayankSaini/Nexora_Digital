@@ -12,10 +12,8 @@ npm install --legacy-peer-deps
 echo "🔄 Generating Prisma client..."
 npx prisma generate
 
-# Deploy database migrations
-echo "🗃️ Deploying database migrations..."
-# Use db push in production for simplicity (or migrate deploy if you're using migrations)
-npx prisma db push --accept-data-loss
+# Skip database migrations during build - handled separately
+echo "🗃️ Skipping database migrations during build..."
 
 # Build Next.js app
 echo "🏗️ Building Next.js application..."
