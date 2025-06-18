@@ -74,9 +74,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           <DashboardSkeleton />
         </div>
       }>
-        <div className="p-6">
-          {children}
-        </div>
+        {children}
       </Suspense>
     </ResponsiveSidebar>
   );
