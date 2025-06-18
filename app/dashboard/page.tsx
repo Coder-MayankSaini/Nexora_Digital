@@ -167,10 +167,33 @@ export default function DashboardPage() {
   const { session } = useSession();
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real-time dashboard data
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardStats(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    // Initial data fetch
+    fetchDashboardStats();
+    
     // Update time every minute
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    
+    // Refresh dashboard data every 5 minutes
+    const dataRefreshTimer = setInterval(fetchDashboardStats, 5 * 60 * 1000);
     
     // Measure page performance
     const perfTimer = setTimeout(() => {
@@ -182,40 +205,76 @@ export default function DashboardPage() {
 
     return () => {
       clearInterval(timer);
+      clearInterval(dataRefreshTimer);
       clearTimeout(perfTimer);
     };
   }, []);
 
-  const stats = [
+  // Use real data from API or fallback to loading/default values
+  const stats = dashboardStats ? [
     {
       title: "Total Views",
-      value: "124.5K",
-      change: "+12.5%",
-      trend: "up" as const,
+      value: dashboardStats.totalViews.value.toLocaleString(),
+      change: dashboardStats.totalViews.change,
+      trend: dashboardStats.totalViews.trend as 'up' | 'down' | 'neutral',
       icon: Eye,
       gradient: "from-blue-500 to-blue-600"
     },
     {
       title: "Active Users",
-      value: "3,247",
-      change: "+8.2%",
-      trend: "up" as const,
+      value: dashboardStats.activeUsers.value.toLocaleString(),
+      change: dashboardStats.activeUsers.change,
+      trend: dashboardStats.activeUsers.trend,
       icon: Users,
       gradient: "from-emerald-500 to-emerald-600"
     },
     {
       title: "Published Posts",
-      value: "156",
+      value: dashboardStats.publishedPosts.toLocaleString(),
       change: "+23.1%",
-      trend: "up" as const,
+      trend: "up",
       icon: FileText,
       gradient: "from-purple-500 to-purple-600"
     },
     {
       title: "Engagement Rate",
-      value: "94.3%",
-      change: "+5.7%",
-      trend: "up" as const,
+      value: `${dashboardStats.engagement.value}%`,
+      change: dashboardStats.engagement.change,
+      trend: dashboardStats.engagement.trend,
+      icon: TrendingUp,
+      gradient: "from-orange-500 to-orange-600"
+    }
+  ] : [
+    // Loading state - show placeholder values
+    {
+      title: "Total Views",
+      value: loading ? "Loading..." : "0",
+      change: "0%",
+      trend: "neutral" as 'up' | 'down' | 'neutral',
+      icon: Eye,
+      gradient: "from-blue-500 to-blue-600"
+    },
+    {
+      title: "Active Users", 
+      value: loading ? "Loading..." : "0",
+      change: "0%",
+      trend: "neutral" as 'up' | 'down' | 'neutral',
+      icon: Users,
+      gradient: "from-emerald-500 to-emerald-600"
+    },
+    {
+      title: "Published Posts",
+      value: loading ? "Loading..." : "0",
+      change: "0%", 
+      trend: "neutral" as 'up' | 'down' | 'neutral',
+      icon: FileText,
+      gradient: "from-purple-500 to-purple-600"
+    },
+    {
+      title: "Engagement Rate",
+      value: loading ? "Loading..." : "0%",
+      change: "0%",
+      trend: "neutral" as 'up' | 'down' | 'neutral', 
       icon: TrendingUp,
       gradient: "from-orange-500 to-orange-600"
     }
@@ -369,7 +428,7 @@ export default function DashboardPage() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
+          {stats.map((stat: any, index: number) => (
             <StatsCard
               key={stat.title}
               {...stat}
