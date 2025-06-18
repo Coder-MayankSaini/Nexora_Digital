@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, Shield } from 'lucide-react';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,5 +105,22 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-gray-800 px-4 py-16">
+        <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
+          <div className="flex flex-col items-center">
+            <Shield className="h-12 w-12 text-orange-600 mb-2" />
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <AdminLoginForm />
+    </Suspense>
   );
 } 
