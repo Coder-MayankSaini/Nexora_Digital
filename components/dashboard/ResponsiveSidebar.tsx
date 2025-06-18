@@ -19,7 +19,8 @@ import {
   X,
   Bell,
   Search,
-  Plus
+  Plus,
+  Mail
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -63,6 +64,12 @@ const sidebarItems: SidebarItem[] = [
     label: 'Admin Panel', 
     roles: ['ADMIN'],
     isNew: true
+  },
+  { 
+    href: '/dashboard/contact-submissions', 
+    icon: Mail, 
+    label: 'Contact Submissions', 
+    roles: ['ADMIN'] 
   },
   { 
     href: '/dashboard/admin/users', 

@@ -79,22 +79,38 @@ export default function ContactPage() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     
-    // Add selected services to form data
-    data.services = selectedServices;
-    
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    // Success
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    reset();
-    setSelectedServices([]);
-    
-    // Hide success message after 5 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-    }, 5000);
+    try {
+      // Add selected services to form data
+      data.services = selectedServices;
+      
+      // Send data to API
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit form');
+      }
+      
+      // Success
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      reset();
+      setSelectedServices([]);
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 5000);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setIsSubmitting(false);
+      // Could also set an error state here to show an error message
+    }
   };
 
   // Toggle selection of services

@@ -87,4 +87,27 @@ model Post {
   authorId         String
   
   @@map("posts")
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+}
+
+model ContactSubmission {
+  id          String        @id @default(cuid())
+  name        String
+  email       String
+  phoneNumber String
+  companyName String?
+  country     String
+  services    String        // JSON string for array storage
+  message     String
+  status      ContactStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  @@map("contact_submissions")
 } 
