@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Mail, Phone, MapPin, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowRight, Mail, Phone, MapPin, Loader2, CheckCircle, Check, ChevronsUpDown } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,18 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Header from '@/components/Header';
+import { Badge } from '@/components/ui/badge';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Animation variants
 const containerVariants = {
@@ -43,17 +55,32 @@ type ContactFormData = {
   email: string;
   phoneNumber: string;
   companyName: string;
+  country: string;
+  services: string[];
   message: string;
 };
+
+// Services available
+const services = [
+  { value: "web-development", label: "Web Development" },
+  { value: "digital-marketing", label: "Digital Marketing" },
+  { value: "local-seo", label: "Local SEO" },
+  { value: "paid-advertising", label: "Paid Advertising" },
+];
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
   
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactFormData>();
+  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ContactFormData>();
   
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
+    
+    // Add selected services to form data
+    data.services = selectedServices;
     
     // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -62,11 +89,23 @@ export default function ContactPage() {
     setIsSubmitting(false);
     setIsSubmitted(true);
     reset();
+    setSelectedServices([]);
     
     // Hide success message after 5 seconds
     setTimeout(() => {
       setIsSubmitted(false);
     }, 5000);
+  };
+
+  // Toggle selection of services
+  const toggleService = (value: string) => {
+    setSelectedServices(current => {
+      if (current.includes(value)) {
+        return current.filter(item => item !== value);
+      } else {
+        return [...current, value];
+      }
+    });
   };
 
   return (
@@ -166,6 +205,79 @@ export default function ContactPage() {
                         className="transition-all duration-200 hover:border-purple-400 focus:border-purple-500"
                         {...register('companyName')}
                       />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="country" className="text-gray-700">Country</Label>
+                      <Input
+                        id="country"
+                        placeholder="Your country"
+                        className={`transition-all duration-200 hover:border-purple-400 focus:border-purple-500 ${errors.country ? 'border-red-500' : ''}`}
+                        {...register('country', { required: 'Country is required' })}
+                      />
+                      {errors.country && (
+                        <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="services" className="text-gray-700">Services Interested In</Label>
+                      <div className="relative">
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={open}
+                              className="w-full justify-between text-gray-500 border hover:border-purple-400 focus:border-purple-500"
+                            >
+                              {selectedServices.length > 0
+                                ? `${selectedServices.length} service${selectedServices.length > 1 ? 's' : ''} selected`
+                                : "Select services..."}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0" align="start">
+                            <div className="max-h-[200px] overflow-auto p-1">
+                              {services.map((service) => (
+                                <div
+                                  key={service.value}
+                                  className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-slate-100 ${
+                                    selectedServices.includes(service.value) ? "bg-slate-100" : ""
+                                  }`}
+                                  onClick={() => {
+                                    toggleService(service.value);
+                                  }}
+                                >
+                                  <div className={`mr-2 h-4 w-4 border ${
+                                    selectedServices.includes(service.value) ? "bg-purple-600 border-purple-600" : "border-gray-300"
+                                  } flex items-center justify-center rounded`}>
+                                    {selectedServices.includes(service.value) && <Check className="h-3 w-3 text-white" />}
+                                  </div>
+                                  <span>{service.label}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      
+                      {/* Display selected services */}
+                      {selectedServices.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {selectedServices.map(value => (
+                            <Badge 
+                              key={value} 
+                              variant="secondary"
+                              className="bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-pointer"
+                              onClick={() => toggleService(value)}
+                            >
+                              {services.find(s => s.value === value)?.label}
+                              <span className="ml-1 text-xs">✕</span>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-2">
