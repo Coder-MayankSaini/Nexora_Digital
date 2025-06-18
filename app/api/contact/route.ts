@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -10,7 +10,7 @@ export async function GET() {
     });
 
     // Parse services from JSON string to array
-    const formattedSubmissions = submissions.map(submission => ({
+    const formattedSubmissions = submissions.map((submission: any) => ({
       ...submission,
       services: JSON.parse(submission.services)
     }));
@@ -25,7 +25,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     

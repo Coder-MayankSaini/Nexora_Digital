@@ -1,12 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+type RouteParams = {
+  params: {
+    id: string;
+  };
+};
+
 export async function PATCH(
-  request: Request,
-  context: { params: { id: string } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
-    const { id } = context.params;
+    const { id } = params;
     const body = await request.json();
     
     // Validate status
