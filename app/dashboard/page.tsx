@@ -4,6 +4,8 @@ import { useSession } from '@/lib/useSession';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { measurePagePerformance, type PerformanceMetrics } from '@/lib/performance';
+import { useNotifications } from '@/hooks/useNotifications';
+import NotificationBell from '@/components/dashboard/NotificationBell';
 import { 
   Card, 
   CardContent, 
@@ -170,6 +172,7 @@ export default function DashboardPage() {
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { notifications, refreshNotifications } = useNotifications();
 
   // Fetch real-time dashboard data
   const fetchDashboardStats = async () => {
@@ -204,6 +207,8 @@ export default function DashboardPage() {
     
     // Refresh dashboard data every 5 minutes
     const dataRefreshTimer = setInterval(fetchDashboardStats, 5 * 60 * 1000);
+    
+    // Notifications are now handled by the useNotifications hook
     
     // Measure page performance
     const perfTimer = setTimeout(() => {
@@ -308,7 +313,7 @@ export default function DashboardPage() {
     {
       icon: MessageSquare,
       label: "Contact Submissions", 
-      description: "Review customer inquiries",
+      description: `Review customer inquiries ${notifications?.newContactSubmissions ? `(${notifications.newContactSubmissions} new)` : ''}`,
       color: "bg-gradient-to-r from-purple-500 to-purple-600",
       onClick: () => window.location.href = '/dashboard/contact-submissions'
     },
@@ -375,14 +380,18 @@ export default function DashboardPage() {
                 </p>
               </div>
               
-              {performanceMetrics && (
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg">
-                  <Zap className="h-4 w-4" />
-                  <span className="text-sm">
-                    Load time: {performanceMetrics.loadTime.toFixed(0)}ms
-                  </span>
-                </div>
-              )}
+                              <div className="flex items-center gap-3">
+                {performanceMetrics && (
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg">
+                    <Zap className="h-4 w-4" />
+                    <span className="text-sm">
+                      Load time: {performanceMetrics.loadTime.toFixed(0)}ms
+                    </span>
+                  </div>
+                )}
+                
+                <NotificationBell notifications={notifications} />
+              </div>
             </div>
           </div>
         </div>
@@ -451,6 +460,50 @@ export default function DashboardPage() {
             />
           ))}
         </div>
+
+        {/* Contact Submissions Summary */}
+        {notifications && notifications.newContactSubmissions > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-6"
+          >
+            <Card 
+              className="border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 hover:shadow-lg transition-all duration-300 cursor-pointer"
+              onClick={() => window.location.href = '/dashboard/contact-submissions'}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                      <MessageSquare className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-blue-900">New Contact Submissions</CardTitle>
+                      <CardDescription className="text-blue-700">
+                        {notifications.newContactSubmissions} unread inquiries awaiting response
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge className="bg-blue-500 text-white text-lg px-3 py-1">
+                    {notifications.newContactSubmissions}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-blue-700">
+                    {notifications.recentContacts} total submissions this week
+                  </p>
+                  <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-200">
+                    View All Submissions →
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+                 )}
       </motion.section>
 
       {/* Main Content Grid */}
@@ -510,28 +563,51 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-1">
-                {(recentActivities.length > 0 ? recentActivities : fallbackActivities).map((activity, index) => {
-                  // Map icon strings to actual components
-                  const iconMap: { [key: string]: any } = {
-                    FileText,
-                    MessageSquare,
-                    Users,
-                    Star
-                  };
-                  const IconComponent = iconMap[activity.icon] || FileText;
-                  
-                  return (
-                    <ActivityItem
-                      key={index}
-                      icon={IconComponent}
-                      title={activity.title}
-                      description={activity.description}
-                      time={activity.time}
-                      color={activity.color}
-                    />
-                  );
-                })}
+                          <div className="space-y-1">
+              {/* Show contact notifications first if any */}
+              {notifications?.latestSubmissions?.map((submission: any, index: number) => (
+                <div
+                  key={`notification-${index}`}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer border border-blue-200"
+                  onClick={() => window.location.href = '/dashboard/contact-submissions'}
+                >
+                  <div className="p-1.5 rounded-lg bg-blue-500">
+                    <MessageSquare className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-blue-900 text-sm">{submission.title}</p>
+                      <Badge className="bg-blue-500 text-white text-xs">NEW</Badge>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-1">{submission.description}</p>
+                    <p className="text-xs text-blue-600 mt-1">Services: {submission.services.join(', ')}</p>
+                  </div>
+                  <span className="text-xs text-blue-600">{submission.time}</span>
+                </div>
+              ))}
+              
+              {/* Regular activities */}
+              {(recentActivities.length > 0 ? recentActivities : fallbackActivities).map((activity, index) => {
+                // Map icon strings to actual components
+                const iconMap: { [key: string]: any } = {
+                  FileText,
+                  MessageSquare,
+                  Users,
+                  Star
+                };
+                const IconComponent = iconMap[activity.icon] || FileText;
+                
+                return (
+                  <ActivityItem
+                    key={index}
+                    icon={IconComponent}
+                    title={activity.title}
+                    description={activity.description}
+                    time={activity.time}
+                    color={activity.color}
+                  />
+                );
+              })}
               </div>
             </CardContent>
           </Card>

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from '@/lib/useSession';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -110,15 +110,52 @@ interface ResponsiveSidebarProps {
 
 export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any>(null);
   const { session } = useSession();
   const pathname = usePathname();
 
   const userRole = session?.user?.role || 'USER';
 
-  // Filter sidebar items based on user role
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch('/api/dashboard/notifications');
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.log('Failed to fetch notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+    // Update every 30 seconds
+    const interval = setInterval(fetchNotifications, 30 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Filter sidebar items based on user role and add dynamic badges
   const allowedItems = sidebarItems.filter(item =>
     item.roles.includes(userRole)
-  );
+  ).map(item => {
+    // Update contact submissions badge with real data
+    if (item.href === '/dashboard/contact-submissions' && notifications) {
+      return {
+        ...item,
+        badge: notifications.newContactSubmissions > 0 ? notifications.newContactSubmissions.toString() : undefined
+      };
+    }
+    // Update content badge with draft posts
+    if (item.href === '/dashboard/editor' && notifications) {
+      return {
+        ...item,
+        badge: notifications.draftPosts > 0 ? notifications.draftPosts.toString() : undefined
+      };
+    }
+    return item;
+  });
 
   const sidebarVariants = {
     open: { x: 0 },

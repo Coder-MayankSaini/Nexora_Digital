@@ -18,7 +18,7 @@ import {
   RefreshCcw,
   Loader2
 } from 'lucide-react';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
 import {
   Popover,
   PopoverContent,
@@ -54,6 +54,28 @@ export default function ContactSubmissionsPage() {
         }
         const data = await response.json();
         setSubmissions(data);
+        
+        // Auto-mark NEW submissions as READ when page loads
+        const newSubmissions = data.filter((sub: ContactSubmission) => sub.status === 'NEW');
+        if (newSubmissions.length > 0) {
+          await Promise.all(
+            newSubmissions.map((sub: ContactSubmission) => 
+              fetch(`/api/contact/${sub.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'READ' })
+              })
+            )
+          );
+          
+          // Update local state
+          setSubmissions(prev => 
+            prev.map(sub => 
+              sub.status === 'NEW' ? { ...sub, status: 'READ' as const } : sub
+            )
+          );
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching submissions:', err);
@@ -200,7 +222,7 @@ export default function ContactSubmissionsPage() {
                   <div>
                     <CardTitle className="text-xl">{submission.name}</CardTitle>
                     <CardDescription>
-                      {format(new Date(submission.createdAt), 'PPp')}
+                      {new Date(submission.createdAt).toLocaleString()}
                     </CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
