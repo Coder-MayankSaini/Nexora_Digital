@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import SessionProvider from '@/components/auth/SessionProvider'
 import HydrationFix from '@/components/HydrationFix'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -46,10 +47,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       </head>
       <body className={inter.className}>
-        <SessionProvider>
-          <HydrationFix />
-          {children}
-        </SessionProvider>
+        <ErrorBoundary>
+          <SessionProvider>
+            <HydrationFix />
+            {children}
+          </SessionProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

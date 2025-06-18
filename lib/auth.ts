@@ -75,7 +75,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24 hours
   },
-  // Add a secret for JWT
-  secret: process.env.NEXTAUTH_SECRET || "development-secret-key-change-in-production",
+  // Add a secret for JWT - ensure it exists
+  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-dev-only-change-in-production-b3b4b07f-405b-49df-936b-0794733a6fbe",
   debug: process.env.NODE_ENV === 'development',
 } 
