@@ -31,7 +31,7 @@ export async function POST() {
             }
           ]
         }),
-        status: 'PUBLISHED',
+        status: 'PUBLISHED' as const,
         authorId: user.id,
         featuredImage: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800',
         seoTitle: 'Getting Started with Modern Web Development',
@@ -53,7 +53,7 @@ export async function POST() {
             }
           ]
         }),
-        status: 'PUBLISHED',
+        status: 'PUBLISHED' as const,
         authorId: user.id,
         featuredImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
         seoTitle: 'Advanced React Patterns and Best Practices',
@@ -75,7 +75,7 @@ export async function POST() {
             }
           ]
         }),
-        status: 'DRAFT',
+        status: 'DRAFT' as const,
         authorId: user.id,
         featuredImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800',
         seoTitle: 'Building Scalable APIs with Node.js',
