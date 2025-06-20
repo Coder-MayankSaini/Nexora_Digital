@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, MessageSquare, Eye, User, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Bell, MessageSquare, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,33 +51,11 @@ export default function NotificationBell({ notifications, variant = 'sidebar' }:
           }`}
         >
           {isHeader ? (
-            <motion.div
-              animate={{ 
-                scale: notifications.totalNotifications > 0 ? [1, 1.1, 1] : 1 
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity, 
-                repeatType: 'loop' 
-              }}
-            >
-              <Bell className="h-5 w-5" />
-            </motion.div>
+            <Bell className="h-5 w-5" />
           ) : (
             <>
               <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
-                <motion.div
-                  animate={{ 
-                    scale: notifications.totalNotifications > 0 ? [1, 1.1, 1] : 1 
-                  }}
-                  transition={{ 
-                    duration: 2, 
-                    repeat: Infinity, 
-                    repeatType: 'loop' 
-                  }}
-                >
-                  <Bell className="h-4 w-4" />
-                </motion.div>
+                <Bell className="h-4 w-4" />
               </div>
               <span className="flex-1 text-left font-medium">Notifications</span>
             </>
@@ -86,35 +64,15 @@ export default function NotificationBell({ notifications, variant = 'sidebar' }:
           {isHeader ? (
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
           ) : (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-            >
-              <Badge variant="destructive" className="text-xs">
-                {notifications.totalNotifications}
-              </Badge>
-            </motion.div>
-          )}
-          
-          {/* Pulsing dot for urgent notifications - only for sidebar */}
-          {!isHeader && notifications.newContactSubmissions > 0 && (
-            <motion.div
-              className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"
-              animate={{ 
-                scale: [1, 1.3, 1],
-                opacity: [1, 0.7, 1]
-              }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity 
-              }}
-            />
+            <Badge variant="destructive" className="text-xs">
+              {notifications.totalNotifications}
+            </Badge>
           )}
         </Button>
       </PopoverTrigger>
       
       <PopoverContent 
-        className="w-80 p-0 border-0 shadow-2xl"
+        className="w-80 p-0 border-0 shadow-xl"
         align="end"
         sideOffset={8}
       >
@@ -133,11 +91,8 @@ export default function NotificationBell({ notifications, variant = 'sidebar' }:
             <div className="space-y-1">
               {/* Contact Submissions */}
               {notifications.latestSubmissions?.map((submission, index) => (
-                <motion.div
+                <div
                   key={submission.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
                   className="p-4 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0"
                   onClick={() => {
                     window.location.href = '/dashboard/contact-submissions';
@@ -176,48 +131,28 @@ export default function NotificationBell({ notifications, variant = 'sidebar' }:
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
               
               {/* Summary Actions */}
               <div className="p-4 bg-gray-50 border-t">
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      window.location.href = '/dashboard/contact-submissions';
-                      setIsOpen(false);
-                    }}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    View All Contact Submissions
-                    {notifications.newContactSubmissions > 0 && (
-                      <Badge className="ml-auto bg-blue-500 text-white">
-                        {notifications.newContactSubmissions}
-                      </Badge>
-                    )}
-                  </Button>
-                  
-                  {notifications.draftPosts > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        window.location.href = '/dashboard/editor';
-                        setIsOpen(false);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Review Draft Posts
-                      <Badge className="ml-auto bg-orange-500 text-white">
-                        {notifications.draftPosts}
-                      </Badge>
-                    </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    window.location.href = '/dashboard/contact-submissions';
+                    setIsOpen(false);
+                  }}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  View All Contact Submissions
+                  {notifications.newContactSubmissions > 0 && (
+                    <Badge className="ml-auto bg-blue-500 text-white">
+                      {notifications.newContactSubmissions}
+                    </Badge>
                   )}
-                </div>
+                </Button>
               </div>
             </div>
           </CardContent>

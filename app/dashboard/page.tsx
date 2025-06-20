@@ -3,7 +3,6 @@
 import { useSession } from '@/lib/useSession';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { measurePagePerformance, type PerformanceMetrics } from '@/lib/performance';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { 
@@ -16,32 +15,20 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  BarChart3,
   TrendingUp,
   Users,
   FileText,
   Eye,
   MessageSquare,
-  Calendar,
-  Clock,
+  Plus,
   Activity,
-  Star,
   ArrowUpRight,
   ArrowDownRight,
-  Plus,
-  Settings,
   Bell,
-  Search,
-  Filter,
-  Download,
-  Share2,
-  Target,
-  Zap,
-  Globe,
-  Smartphone
+  Zap
 } from 'lucide-react';
 
-// Enhanced Stats Card Component
+// Simplified Stats Card Component
 const StatsCard = ({ 
   title, 
   value, 
@@ -72,10 +59,9 @@ const StatsCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
-      whileHover={{ y: -8, scale: 1.02 }}
       className="group"
     >
-      <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50/50">
+      <Card className="relative overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300">
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
         
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -139,7 +125,7 @@ const QuickActionButton = ({
   </motion.button>
 );
 
-// Recent Activity Item Component
+// Activity Item Component
 const ActivityItem = ({ 
   icon: Icon, 
   title, 
@@ -167,14 +153,13 @@ const ActivityItem = ({
 
 export default function DashboardPage() {
   const { session } = useSession();
-  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { notifications, refreshNotifications } = useNotifications();
 
-  // Fetch real-time dashboard data
+  // Fetch dashboard data
   const fetchDashboardStats = async () => {
     try {
       const [statsResponse, activityResponse] = await Promise.all([
@@ -207,21 +192,10 @@ export default function DashboardPage() {
     
     // Refresh dashboard data every 5 minutes
     const dataRefreshTimer = setInterval(fetchDashboardStats, 5 * 60 * 1000);
-    
-    // Notifications are now handled by the useNotifications hook
-    
-    // Measure page performance
-    const perfTimer = setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const metrics = measurePagePerformance();
-        setPerformanceMetrics(metrics);
-      }
-    }, 1000);
 
     return () => {
       clearInterval(timer);
       clearInterval(dataRefreshTimer);
-      clearTimeout(perfTimer);
     };
   }, []);
 
@@ -326,7 +300,7 @@ export default function DashboardPage() {
     }
   ];
 
-  // Recent activities are now fetched from API and stored in state
+  // Fallback activity for empty state
   const fallbackActivities = [
     {
       icon: FileText,
@@ -339,7 +313,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-8 max-w-7xl mx-auto">
-      {/* Enhanced Header */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -380,16 +354,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               
-                              <div className="flex items-center gap-3">
-                {performanceMetrics && (
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg">
-                    <Zap className="h-4 w-4" />
-                    <span className="text-sm">
-                      Load time: {performanceMetrics.loadTime.toFixed(0)}ms
-                    </span>
-                  </div>
-                )}
-                
+              <div className="flex items-center gap-3">
                 <NotificationBell notifications={notifications} />
               </div>
             </div>
@@ -443,10 +408,6 @@ export default function DashboardPage() {
             >
               <Plus className="h-4 w-4" />
               Add Sample Data
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Export
             </Button>
           </div>
         </div>
@@ -503,7 +464,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </motion.div>
-                 )}
+        )}
       </motion.section>
 
       {/* Main Content Grid */}
@@ -536,14 +497,13 @@ export default function DashboardPage() {
           </Card>
         </motion.section>
 
-        {/* Recent Activity & Analytics */}
+        {/* Recent Activity */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           className="lg:col-span-2 space-y-6"
         >
-          {/* Recent Activity */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -563,93 +523,50 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-                          <div className="space-y-1">
-              {/* Show contact notifications first if any */}
-              {notifications?.latestSubmissions?.map((submission: any, index: number) => (
-                <div
-                  key={`notification-${index}`}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer border border-blue-200"
-                  onClick={() => window.location.href = '/dashboard/contact-submissions'}
-                >
-                  <div className="p-1.5 rounded-lg bg-blue-500">
-                    <MessageSquare className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-blue-900 text-sm">{submission.title}</p>
-                      <Badge className="bg-blue-500 text-white text-xs">NEW</Badge>
+              <div className="space-y-1">
+                {/* Show contact notifications first if any */}
+                {notifications?.latestSubmissions?.map((submission: any, index: number) => (
+                  <div
+                    key={`notification-${index}`}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer border border-blue-200"
+                    onClick={() => window.location.href = '/dashboard/contact-submissions'}
+                  >
+                    <div className="p-1.5 rounded-lg bg-blue-500">
+                      <MessageSquare className="h-4 w-4 text-white" />
                     </div>
-                    <p className="text-xs text-blue-700 mt-1">{submission.description}</p>
-                    <p className="text-xs text-blue-600 mt-1">Services: {submission.services.join(', ')}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-blue-900 text-sm">{submission.title}</p>
+                        <Badge className="bg-blue-500 text-white text-xs">NEW</Badge>
+                      </div>
+                      <p className="text-xs text-blue-700 mt-1">{submission.description}</p>
+                      <p className="text-xs text-blue-600 mt-1">Services: {submission.services.join(', ')}</p>
+                    </div>
+                    <span className="text-xs text-blue-600">{submission.time}</span>
                   </div>
-                  <span className="text-xs text-blue-600">{submission.time}</span>
-                </div>
-              ))}
-              
-              {/* Regular activities */}
-              {(recentActivities.length > 0 ? recentActivities : fallbackActivities).map((activity, index) => {
-                // Map icon strings to actual components
-                const iconMap: { [key: string]: any } = {
-                  FileText,
-                  MessageSquare,
-                  Users,
-                  Star
-                };
-                const IconComponent = iconMap[activity.icon] || FileText;
+                ))}
                 
-                return (
-                  <ActivityItem
-                    key={index}
-                    icon={IconComponent}
-                    title={activity.title}
-                    description={activity.description}
-                    time={activity.time}
-                    color={activity.color}
-                  />
-                );
-              })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Platform Stats */}
-          <Card className="border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-purple-600" />
-                Platform Insights
-              </CardTitle>
-              <CardDescription>
-                Audience and device analytics
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium">Desktop</span>
-                    </div>
-                    <span className="text-sm font-semibold">68%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '68%' }} />
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Smartphone className="h-4 w-4 text-emerald-600" />
-                      <span className="text-sm font-medium">Mobile</span>
-                    </div>
-                    <span className="text-sm font-semibold">32%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '32%' }} />
-                  </div>
-                </div>
+                {/* Regular activities */}
+                {(recentActivities.length > 0 ? recentActivities : fallbackActivities).map((activity, index) => {
+                  // Map icon strings to actual components
+                  const iconMap: { [key: string]: any } = {
+                    FileText,
+                    MessageSquare,
+                    Users
+                  };
+                  const IconComponent = iconMap[activity.icon] || FileText;
+                  
+                  return (
+                    <ActivityItem
+                      key={index}
+                      icon={IconComponent}
+                      title={activity.title}
+                      description={activity.description}
+                      time={activity.time}
+                      color={activity.color}
+                    />
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
