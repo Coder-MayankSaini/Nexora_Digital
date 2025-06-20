@@ -1,24 +1,52 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function FloatingParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  useEffect(() => {
+    // Only show particles after a delay and if motion is not reduced
+    if (prefersReducedMotion) return;
+    
+    const timer = setTimeout(() => setIsVisible(true), 2000);
+    return () => clearTimeout(timer);
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!isVisible || prefersReducedMotion) return;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    resizeCanvas();
 
     const particles: Particle[] = [];
-    const particleCount = 80;
-    const connectionDistance = 150;
+    // Drastically reduced particle count for better performance
+    const particleCount = window.innerWidth > 768 ? 15 : 8;
+    let animationId: number;
 
     class Particle {
       x: number;
@@ -32,28 +60,30 @@ export default function FloatingParticles() {
       constructor() {
         this.x = Math.random() * canvas!.width;
         this.y = Math.random() * canvas!.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = Math.random() * 0.5 - 0.25;
-        this.speedY = Math.random() * 0.5 - 0.25;
-        this.opacity = Math.random() * 0.3 + 0.1;
-        this.hue = Math.random() * 60 + 240; // Blue to purple range
+        this.size = Math.random() * 1.5 + 0.5; // Smaller particles
+        this.speedX = (Math.random() - 0.5) * 0.3; // Slower movement
+        this.speedY = (Math.random() - 0.5) * 0.3;
+        this.opacity = Math.random() * 0.2 + 0.05; // More subtle
+        this.hue = Math.random() * 40 + 250; // Purple-blue range
       }
 
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
 
-        // Wrap around edges
-        if (this.x > canvas!.width) this.x = 0;
-        if (this.x < 0) this.x = canvas!.width;
-        if (this.y > canvas!.height) this.y = 0;
-        if (this.y < 0) this.y = canvas!.height;
+        // Bounce off edges instead of wrapping for smoother movement
+        if (this.x <= 0 || this.x >= canvas!.width) this.speedX *= -1;
+        if (this.y <= 0 || this.y >= canvas!.height) this.speedY *= -1;
+        
+        // Keep within bounds
+        this.x = Math.max(0, Math.min(canvas!.width, this.x));
+        this.y = Math.max(0, Math.min(canvas!.height, this.y));
       }
 
       draw() {
         ctx!.beginPath();
         ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx!.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
+        ctx!.fillStyle = `hsla(${this.hue}, 60%, 70%, ${this.opacity})`;
         ctx!.fill();
       }
     }
@@ -63,104 +93,88 @@ export default function FloatingParticles() {
       particles.push(new Particle());
     }
 
-    // Draw connections between nearby particles
-    function drawConnections() {
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+    let lastTime = 0;
+    const targetFPS = 30; // Limit to 30 FPS instead of 60
+    const frameInterval = 1000 / targetFPS;
 
-          if (distance < connectionDistance) {
-            const opacity = (1 - distance / connectionDistance) * 0.1;
-            ctx!.beginPath();
-            ctx!.moveTo(particles[i].x, particles[i].y);
-            ctx!.lineTo(particles[j].x, particles[j].y);
-            ctx!.strokeStyle = `rgba(139, 92, 246, ${opacity})`;
-            ctx!.lineWidth = 0.5;
-            ctx!.stroke();
-          }
-        }
+    // Simplified animation loop with FPS limiting
+    function animate(currentTime: number) {
+      if (currentTime - lastTime >= frameInterval) {
+        ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+
+        particles.forEach((particle) => {
+          particle.update();
+          particle.draw();
+        });
+
+        lastTime = currentTime;
       }
+      
+      animationId = requestAnimationFrame(animate);
     }
 
-    // Animation loop
-    function animate() {
-      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+    animationId = requestAnimationFrame(animate);
 
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
-      });
-
-      drawConnections();
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-
-    // Handle resize
+    // Throttled resize handler
+    let resizeTimer: NodeJS.Timeout;
     const handleResize = () => {
-      canvas!.width = window.innerWidth;
-      canvas!.height = window.innerHeight;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resizeCanvas, 250);
     };
 
     window.addEventListener('resize', handleResize);
 
     return () => {
+      cancelAnimationFrame(animationId);
       window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
     };
-  }, []);
+  }, [isVisible, prefersReducedMotion]);
+
+  // Don't render anything if reduced motion is preferred
+  if (prefersReducedMotion) {
+    return (
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900/5 via-purple-900/5 to-slate-900/5" />
+    );
+  }
 
   return (
     <>
-      {/* Canvas for particles */}
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 -z-10 opacity-50"
-        style={{ pointerEvents: 'none' }}
-      />
-
-      {/* Additional animated elements */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        {/* Gradient orbs */}
-        <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -100, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="absolute -top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[150px]"
+      {/* Canvas for particles - only show when visible */}
+      {isVisible && (
+        <canvas
+          ref={canvasRef}
+          className="fixed inset-0 -z-10 opacity-40"
+          style={{ pointerEvents: 'none' }}
         />
-        
+      )}
+
+      {/* Simplified gradient backgrounds - fewer and simpler */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
         <motion.div
           animate={{
-            x: [0, -150, 0],
-            y: [0, 50, 0],
+            x: [0, 50, 0],
+            y: [0, -30, 0],
           }}
           transition={{
             duration: 25,
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute -bottom-1/4 -right-1/4 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[200px]"
+          className="absolute -top-1/4 -left-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px]"
         />
         
         <motion.div
           animate={{
-            x: [0, 50, 0],
-            y: [0, 150, 0],
+            x: [0, -30, 0],
+            y: [0, 40, 0],
           }}
           transition={{
             duration: 30,
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-[120px]"
+          className="absolute -bottom-1/4 -right-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px]"
         />
       </div>
     </>

@@ -1,47 +1,71 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import AnimatedHero from '@/components/home/AnimatedHero';
-import AnimatedServices from '@/components/home/AnimatedServices';
-import AnimatedPortfolio from '@/components/home/AnimatedPortfolio';
-import AnimatedTestimonials from '@/components/home/AnimatedTestimonials';
-import AnimatedCTA from '@/components/home/AnimatedCTA';
-import FloatingParticles from '@/components/home/FloatingParticles';
 import { cn } from '@/lib/utils';
+
+// Lazy load heavy components to improve initial page load
+const AnimatedServices = dynamic(() => import('@/components/home/AnimatedServices'), {
+  loading: () => <div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div></div>,
+  ssr: false
+});
+
+const AnimatedPortfolio = dynamic(() => import('@/components/home/AnimatedPortfolio'), {
+  loading: () => <div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div></div>,
+  ssr: false
+});
+
+const AnimatedTestimonials = dynamic(() => import('@/components/home/AnimatedTestimonials'), {
+  loading: () => <div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin"></div></div>,
+  ssr: false
+});
+
+const AnimatedCTA = dynamic(() => import('@/components/home/AnimatedCTA'), {
+  loading: () => <div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div></div>,
+  ssr: false
+});
+
+const FloatingParticles = dynamic(() => import('@/components/home/FloatingParticles'), {
+  loading: () => null,
+  ssr: false
+});
 
 export default function Home() {
   const { scrollY } = useScroll();
-  const smoothScrollY = useSpring(scrollY, { stiffness: 100, damping: 30 });
+  // Simplified spring configuration for better performance
+  const smoothScrollY = useSpring(scrollY, { stiffness: 50, damping: 20, mass: 1 });
 
-  // Parallax transforms for different sections
-  const heroParallax = useTransform(smoothScrollY, [0, 500], [0, -150]);
-  const servicesParallax = useTransform(smoothScrollY, [200, 800], [50, -50]);
+  // Reduced parallax transforms for better performance
+  const heroParallax = useTransform(smoothScrollY, [0, 500], [0, -50]);
 
   return (
     <>
       <Header />
       <main className="relative overflow-hidden">
-        {/* Floating particles background */}
-        <FloatingParticles />
+        {/* Floating particles background - lazy loaded */}
+        <Suspense fallback={null}>
+          <FloatingParticles />
+        </Suspense>
         
-        {/* Animated gradient background */}
+        {/* Simplified animated gradient background */}
         <div className="fixed inset-0 -z-10">
           <motion.div
             animate={{
               background: [
-                'radial-gradient(circle at 20% 50%, rgba(120, 50, 255, 0.1) 0%, transparent 50%)',
-                'radial-gradient(circle at 80% 50%, rgba(120, 50, 255, 0.1) 0%, transparent 50%)',
-                'radial-gradient(circle at 20% 50%, rgba(120, 50, 255, 0.1) 0%, transparent 50%)',
+                'radial-gradient(circle at 20% 50%, rgba(120, 50, 255, 0.05) 0%, transparent 50%)',
+                'radial-gradient(circle at 80% 50%, rgba(120, 50, 255, 0.05) 0%, transparent 50%)',
+                'radial-gradient(circle at 20% 50%, rgba(120, 50, 255, 0.05) 0%, transparent 50%)',
               ],
             }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
             className="absolute inset-0"
           />
         </div>
 
-        {/* Hero Section with Parallax */}
+        {/* Hero Section with Reduced Parallax */}
         <motion.section 
           style={{ y: heroParallax }}
           className="relative min-h-screen"
@@ -54,34 +78,39 @@ export default function Home() {
           <AboutSection />
         </section>
 
-        {/* Services Section with Parallax */}
-        <motion.section 
-          style={{ y: servicesParallax }}
-          className="relative py-20"
-        >
-          <AnimatedServices />
-        </motion.section>
-
-        {/* Portfolio Section */}
-        <section className="relative py-20 bg-white/90 backdrop-blur-sm">
-          <AnimatedPortfolio />
-        </section>
-
-        {/* Testimonials Section */}
+        {/* Services Section - Lazy Loaded */}
         <section className="relative py-20">
-          <AnimatedTestimonials />
+          <Suspense fallback={<div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div></div>}>
+            <AnimatedServices />
+          </Suspense>
         </section>
 
-        {/* Call to Action */}
+        {/* Portfolio Section - Lazy Loaded */}
+        <section className="relative py-20 bg-white/90 backdrop-blur-sm">
+          <Suspense fallback={<div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div></div>}>
+            <AnimatedPortfolio />
+          </Suspense>
+        </section>
+
+        {/* Testimonials Section - Lazy Loaded */}
+        <section className="relative py-20">
+          <Suspense fallback={<div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin"></div></div>}>
+            <AnimatedTestimonials />
+          </Suspense>
+        </section>
+
+        {/* Call to Action - Lazy Loaded */}
         <section className="relative py-20 bg-gradient-to-b from-white/90 to-gray-50/90 backdrop-blur-sm">
-          <AnimatedCTA />
+          <Suspense fallback={<div className="py-20 flex items-center justify-center"><div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div></div>}>
+            <AnimatedCTA />
+          </Suspense>
         </section>
       </main>
     </>
   );
 }
 
-// About Section Component
+// Optimized About Section Component
 function AboutSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
@@ -91,7 +120,7 @@ function AboutSection() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.15, // Reduced stagger for faster appearance
         delayChildren: 0.1,
       },
     },
@@ -103,7 +132,7 @@ function AboutSection() {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.4, // Faster animations
         ease: [0.6, -0.05, 0.01, 0.99],
       },
     },
@@ -146,7 +175,7 @@ function AboutSection() {
             Our passion for innovation drives every project we undertake.
           </motion.p>
 
-          {/* Animated Stats Grid */}
+          {/* Simplified Stats Grid */}
           <motion.div 
             variants={itemVariants}
             className="grid grid-cols-2 gap-6"
@@ -154,15 +183,14 @@ function AboutSection() {
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }} // Reduced hover scale
                 className="relative group"
               >
-                <div className="relative z-10 bg-white p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                <div className="relative z-10 bg-white p-6 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                   <motion.div 
                     initial={{ scale: 0 }}
                     animate={isInView ? { scale: 1 } : { scale: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1, duration: 0.5, type: "spring" }}
+                    transition={{ delay: 0.2 + index * 0.05, duration: 0.3, type: "spring" }}
                     className={cn(
                       "text-3xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent",
                       stat.color
@@ -172,82 +200,48 @@ function AboutSection() {
                   </motion.div>
                   <div className="text-gray-600 text-sm">{stat.label}</div>
                 </div>
-                {/* Glow effect on hover */}
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-r rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity",
-                  stat.color
-                )} />
               </motion.div>
             ))}
           </motion.div>
         </div>
 
-        {/* Image Section with Advanced Animation */}
+        {/* Simplified Image Section */}
         <motion.div 
           variants={itemVariants}
           className="relative"
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative"
           >
             {/* Main image */}
             <motion.img 
               src="https://picsum.photos/600/400?random=10" 
               alt="About Us"
-              className="rounded-2xl shadow-xl"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
+              className="rounded-2xl shadow-xl w-full h-auto"
+              loading="lazy"
             />
             
-            {/* Animated overlay elements */}
+            {/* Floating card - simplified */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl"
+              initial={{ x: -50, opacity: 0 }}
+              animate={isInView ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="absolute -bottom-4 -left-4 bg-white p-4 rounded-xl shadow-lg"
             >
               <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center"
-                >
-                  <span className="text-white text-xl">✨</span>
-                </motion.div>
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold">5.0</span>
+                </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">5+ Years</div>
-                  <div className="text-sm text-gray-600">of Excellence</div>
+                  <div className="font-semibold text-gray-900">Excellent</div>
+                  <div className="text-sm text-gray-600">Client Rating</div>
                 </div>
               </div>
             </motion.div>
-
-            {/* Floating badges */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-              className="absolute -top-4 -right-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg"
-            >
-              Award Winning
-            </motion.div>
           </motion.div>
-
-          {/* Background decoration */}
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-full blur-3xl -z-10"
-          />
         </motion.div>
       </motion.div>
     </div>

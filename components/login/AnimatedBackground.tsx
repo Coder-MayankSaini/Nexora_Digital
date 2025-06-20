@@ -1,23 +1,52 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  useEffect(() => {
+    // Only show particles after a delay and if motion is not reduced
+    if (prefersReducedMotion) return;
+    
+    const timer = setTimeout(() => setIsVisible(true), 1000);
+    return () => clearTimeout(timer);
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!isVisible || prefersReducedMotion) return;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    resizeCanvas();
 
     const particles: Particle[] = [];
-    const particleCount = 50;
+    // Reduced particle count for better performance
+    const particleCount = window.innerWidth > 768 ? 12 : 6;
+    let animationId: number;
 
     class Particle {
       x: number;
@@ -30,20 +59,23 @@ export default function AnimatedBackground() {
       constructor() {
         this.x = Math.random() * canvas!.width;
         this.y = Math.random() * canvas!.height;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = Math.random() * 0.5 - 0.25;
-        this.speedY = Math.random() * 0.5 - 0.25;
-        this.opacity = Math.random() * 0.5 + 0.2;
+        this.size = Math.random() * 2 + 0.5; // Smaller particles
+        this.speedX = (Math.random() - 0.5) * 0.4; // Slower movement
+        this.speedY = (Math.random() - 0.5) * 0.4;
+        this.opacity = Math.random() * 0.3 + 0.1;
       }
 
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
 
-        if (this.x > canvas!.width) this.x = 0;
-        if (this.x < 0) this.x = canvas!.width;
-        if (this.y > canvas!.height) this.y = 0;
-        if (this.y < 0) this.y = canvas!.height;
+        // Bounce off edges
+        if (this.x <= 0 || this.x >= canvas!.width) this.speedX *= -1;
+        if (this.y <= 0 || this.y >= canvas!.height) this.speedY *= -1;
+        
+        // Keep within bounds
+        this.x = Math.max(0, Math.min(canvas!.width, this.x));
+        this.y = Math.max(0, Math.min(canvas!.height, this.y));
       }
 
       draw() {
@@ -59,142 +91,98 @@ export default function AnimatedBackground() {
       particles.push(new Particle());
     }
 
-    // Animation loop
-    function animate() {
-      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+    let lastTime = 0;
+    const targetFPS = 30; // Limit to 30 FPS
+    const frameInterval = 1000 / targetFPS;
 
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
-      });
+    // Simplified animation loop with FPS limiting
+    function animate(currentTime: number) {
+      if (currentTime - lastTime >= frameInterval) {
+        ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
 
-      requestAnimationFrame(animate);
+        particles.forEach((particle) => {
+          particle.update();
+          particle.draw();
+        });
+
+        lastTime = currentTime;
+      }
+      
+      animationId = requestAnimationFrame(animate);
     }
 
-    animate();
+    animationId = requestAnimationFrame(animate);
 
-    // Handle resize
+    // Throttled resize handler
+    let resizeTimer: NodeJS.Timeout;
     const handleResize = () => {
-      canvas!.width = window.innerWidth;
-      canvas!.height = window.innerHeight;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resizeCanvas, 250);
     };
 
     window.addEventListener('resize', handleResize);
 
     return () => {
+      cancelAnimationFrame(animationId);
       window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
     };
-  }, []);
+  }, [isVisible, prefersReducedMotion]);
+
+  // Static background for reduced motion
+  if (prefersReducedMotion) {
+    return (
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20" />
+    );
+  }
 
   return (
     <>
-      {/* Canvas for particles */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 z-0"
-        style={{ pointerEvents: 'none' }}
+      {/* Canvas for particles - only show when visible */}
+      {isVisible && (
+        <canvas
+          ref={canvasRef}
+          className="fixed inset-0 -z-10 opacity-30"
+          style={{ pointerEvents: 'none' }}
+        />
+      )}
+
+      {/* Simplified gradient overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2 }}
+        className="fixed inset-0 -z-10 bg-gradient-to-br from-purple-900/10 via-blue-900/10 to-indigo-900/10"
       />
 
-      {/* Animated gradient orbs */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Static geometric shapes for visual interest */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
         <motion.div
           animate={{
-            x: [0, 100, 0],
-            y: [0, -100, 0],
+            rotate: [0, 360],
+            scale: [1, 1.1, 1],
           }}
           transition={{
             duration: 20,
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute -top-1/2 -left-1/2 w-[800px] h-[800px] bg-purple-500 rounded-full blur-[200px] opacity-20"
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/5 rounded-full blur-[60px]"
         />
         
         <motion.div
           animate={{
-            x: [0, -150, 0],
-            y: [0, 50, 0],
+            rotate: [360, 0],
+            scale: [1.1, 1, 1.1],
           }}
           transition={{
             duration: 25,
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute -bottom-1/2 -right-1/2 w-[1000px] h-[1000px] bg-pink-500 rounded-full blur-[200px] opacity-20"
-        />
-        
-        <motion.div
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500 rounded-full blur-[150px] opacity-10"
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-[80px]"
         />
       </div>
-
-      {/* Grid pattern overlay */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-          maskImage: 'radial-gradient(ellipse at center, transparent 0%, black 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 0%, black 100%)',
-        }}
-      />
-
-      {/* Animated lines */}
-      <svg className="absolute inset-0 w-full h-full z-0" style={{ pointerEvents: 'none' }}>
-        <motion.line
-          x1="10%"
-          y1="10%"
-          x2="90%"
-          y2="90%"
-          stroke="url(#line-gradient-1)"
-          strokeWidth="0.5"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.3 }}
-          transition={{
-            pathLength: { duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-            opacity: { duration: 1 }
-          }}
-        />
-        <motion.line
-          x1="90%"
-          y1="10%"
-          x2="10%"
-          y2="90%"
-          stroke="url(#line-gradient-2)"
-          strokeWidth="0.5"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 0.3 }}
-          transition={{
-            pathLength: { duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 },
-            opacity: { duration: 1 }
-          }}
-        />
-        
-        <defs>
-          <linearGradient id="line-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0" />
-            <stop offset="50%" stopColor="#8B5CF6" stopOpacity="1" />
-            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="line-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#EC4899" stopOpacity="0" />
-            <stop offset="50%" stopColor="#EC4899" stopOpacity="1" />
-            <stop offset="100%" stopColor="#EC4899" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
     </>
   );
 } 
