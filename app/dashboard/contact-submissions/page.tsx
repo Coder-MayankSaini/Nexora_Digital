@@ -7,8 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRequiredRole } from '@/components/auth/AdminProtection';
-import { memoryOptimization } from '@/lib/performance';
+import AdminProtection from '@/components/auth/AdminProtection';
 
 // Type definitions
 interface ContactSubmission {
@@ -43,8 +42,7 @@ function useDebounced<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export default function ContactSubmissionsPage() {
-  const { hasRole } = useRequiredRole('ADMIN');
+function ContactSubmissionsContent() {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -166,7 +164,7 @@ export default function ContactSubmissionsPage() {
               fetch(`/api/contact/${sub.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'read' })
+                body: JSON.stringify({ status: 'READ' })
               })
             )
           );
@@ -174,7 +172,7 @@ export default function ContactSubmissionsPage() {
           // Update local state
           setSubmissions(prev => 
             prev.map(sub => 
-              sub.status === 'NEW' ? { ...sub, status: 'read' as const } : sub
+              sub.status === 'NEW' ? { ...sub, status: 'READ' as const } : sub
             )
           );
         }
@@ -187,14 +185,8 @@ export default function ContactSubmissionsPage() {
       }
     }
 
-    if (hasRole) {
-      fetchSubmissions();
-    }
-  }, [hasRole]);
-
-  if (!hasRole) {
-    return null;
-  }
+    fetchSubmissions();
+  }, []);
 
   if (error) {
     return (
@@ -453,4 +445,13 @@ const SubmissionCard = ({ submission, onDelete, onUpdateStatus, deleteLoading }:
       </CardContent>
     </Card>
   );
-}; 
+};
+
+// Export the main component wrapped with AdminProtection
+export default function ContactSubmissionsPage() {
+  return (
+    <AdminProtection>
+      <ContactSubmissionsContent />
+    </AdminProtection>
+  );
+} 
