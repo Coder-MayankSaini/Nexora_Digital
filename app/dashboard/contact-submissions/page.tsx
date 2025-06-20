@@ -242,7 +242,7 @@ function ContactSubmissionsContent() {
                 onClick={() => handleStatusChange(status)}
                 className="text-xs"
               >
-                {status === 'ALL' ? 'All' : status === 'read' ? 'Read' : status}
+                {status === 'ALL' ? 'All' : status === 'READ' ? 'Read' : status}
                 {status !== 'ALL' && (
                   <Badge variant="secondary" className="ml-1 text-xs">
                     {statusCounts[status] || 0}
@@ -341,11 +341,11 @@ const SubmissionCard = ({ submission, onDelete, onUpdateStatus, deleteLoading }:
   const statusColor = useMemo(() => {
     const colors = {
       'NEW': 'bg-blue-100 text-blue-800',
-      'read': 'bg-gray-100 text-gray-800',
+      'READ': 'bg-gray-100 text-gray-800',
       'REPLIED': 'bg-green-100 text-green-800',
       'ARCHIVED': 'bg-yellow-100 text-yellow-800'
     };
-    return colors[submission.status] || colors['read'];
+    return colors[submission.status] || colors['READ'];
   }, [submission.status]);
 
   return (
@@ -372,7 +372,7 @@ const SubmissionCard = ({ submission, onDelete, onUpdateStatus, deleteLoading }:
           </div>
           <div className="flex items-center gap-2">
             <Badge className={statusColor}>
-              {submission.status === 'read' ? 'Read' : submission.status}
+              {submission.status === 'READ' ? 'Read' : submission.status}
             </Badge>
           </div>
         </div>
