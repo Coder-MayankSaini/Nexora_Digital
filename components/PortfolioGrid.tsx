@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import SectionDivider from './SectionDivider';
+import SectionDivider from '@/components/SectionDivider';
 import useWindowSize from '@/lib/useWindowSize';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 // Portfolio item types
 type Category = 'All' | 'Web' | 'Mobile' | 'SaaS';
@@ -20,109 +21,109 @@ interface PortfolioItem {
   span?: number; // Grid span
 }
 
-// Sample portfolio data
+// Optimized portfolio data with better image URLs and reduced size
 const portfolioItems: PortfolioItem[] = [
   {
     id: 1,
     title: "Modern E-commerce Website",
     category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/26/800/600",
+    imageUrl: "https://picsum.photos/id/26/600/450?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 450,
     span: 1
   },
   {
     id: 2,
     title: "Mobile Banking App",
     category: ["Mobile"],
-    imageUrl: "https://picsum.photos/id/96/800/1200",
+    imageUrl: "https://picsum.photos/id/96/600/900?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 1200,
+    width: 600,
+    height: 900,
     span: 2
   },
   {
     id: 3,
     title: "Project Management SaaS",
     category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/42/800/800",
+    imageUrl: "https://picsum.photos/id/42/600/600?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 800,
+    width: 600,
+    height: 600,
     span: 1
   },
   {
     id: 4,
     title: "Health Tracking Mobile App",
     category: ["Mobile"],
-    imageUrl: "https://picsum.photos/id/64/800/1000",
+    imageUrl: "https://picsum.photos/id/64/600/750?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 1000,
+    width: 600,
+    height: 750,
     span: 2
   },
   {
     id: 5,
     title: "AI Content Generator",
     category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/91/800/600",
+    imageUrl: "https://picsum.photos/id/91/600/450?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 450,
     span: 1
   },
   {
     id: 6,
     title: "Real Estate Finder App",
     category: ["Mobile", "SaaS"],
-    imageUrl: "https://picsum.photos/id/239/800/900",
+    imageUrl: "https://picsum.photos/id/239/600/675?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 900,
+    width: 600,
+    height: 675,
     span: 2
   },
   {
     id: 7,
     title: "Portfolio Website Template",
     category: ["Web"],
-    imageUrl: "https://picsum.photos/id/180/800/600",
+    imageUrl: "https://picsum.photos/id/180/600/450?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 600,
+    width: 600,
+    height: 450,
     span: 1
   },
   {
     id: 8,
     title: "Accounting Dashboard SaaS",
     category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/106/800/700",
+    imageUrl: "https://picsum.photos/id/106/600/525?auto=format&fit=crop",
     link: "#",
-    width: 800,
-    height: 700,
+    width: 600,
+    height: 525,
     span: 1
   }
 ];
 
 export default function PortfolioGrid() {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
-  const [filteredItems, setFilteredItems] = useState<PortfolioItem[]>(portfolioItems);
   const { width } = useWindowSize();
   
-  // Filter items when category changes
-  useEffect(() => {
+  // Memoized filtered items for performance
+  const filteredItems = useMemo(() => {
     if (activeCategory === 'All') {
-      setFilteredItems(portfolioItems);
-    } else {
-      const filtered = portfolioItems.filter(item => 
-        item.category.includes(activeCategory)
-      );
-      setFilteredItems(filtered);
+      return portfolioItems;
     }
+    return portfolioItems.filter(item => item.category.includes(activeCategory));
   }, [activeCategory]);
+
+  // Memoized category handler
+  const handleCategoryChange = useCallback((category: Category) => {
+    setActiveCategory(category);
+  }, []);
   
-  // Determine row span based on screen size
-  const getRowSpan = (item: PortfolioItem) => {
+  // Determine row span based on screen size - memoized
+  const getRowSpan = useCallback((item: PortfolioItem) => {
     if (!width) return item.span || 1;
     
     // Adjust row span based on screen size
@@ -136,7 +137,15 @@ export default function PortfolioGrid() {
       // Desktop view
       return Math.ceil(item.height / (item.width / 100) / 40);
     }
-  };
+  }, [width]);
+
+  // Memoized grid styles for better performance
+  const gridStyles = useMemo(() => ({
+    display: 'grid',
+    gridTemplateColumns: width && width < 768 ? '1fr' : width && width < 1024 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+    gap: '1.5rem',
+    gridAutoRows: '10px',
+  }), [width]);
   
   return (
     <section id="portfolio" className="py-20 bg-background relative">
@@ -157,14 +166,14 @@ export default function PortfolioGrid() {
             Explore our portfolio of projects across web, mobile, and SaaS platforms.
           </p>
           
-          {/* Filter Tabs */}
+          {/* Filter Tabs - Optimized with memoized handlers */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {['All', 'Web', 'Mobile', 'SaaS'].map((category) => (
+            {(['All', 'Web', 'Mobile', 'SaaS'] as Category[]).map((category) => (
               <Button
                 key={category}
                 variant={activeCategory === category ? "default" : "outline"}
                 size="sm"
-                onClick={() => setActiveCategory(category as Category)}
+                onClick={() => handleCategoryChange(category)}
                 className="min-w-20"
               >
                 {category}
@@ -173,82 +182,121 @@ export default function PortfolioGrid() {
           </div>
         </motion.div>
         
-        {/* Masonry Portfolio Grid */}
-        <div className="grid-masonry-container">
+        {/* Optimized Masonry Portfolio Grid */}
+        <div className="relative">
           <motion.div 
             layout
-            className="grid-masonry"
+            style={gridStyles}
+            className="auto-rows-[10px]"
           >
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {filteredItems.map((item) => (
-                <motion.div
+                <PortfolioCard
                   key={item.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.5 }}
-                  className="grid-masonry-item group cursor-pointer relative overflow-hidden rounded-lg shadow-md"
-                  style={{ 
-                    gridRow: `span ${getRowSpan(item)}`,
-                    aspectRatio: item.width / item.height
-                  }}
-                >
-                  {/* Image */}
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full h-full"
-                  >
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title}
-                      className="w-full h-full object-cover" 
-                      loading="lazy"
-                    />
-                  </motion.div>
-                  
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-white">
-                    <motion.h3 
-                      initial={{ y: 20, opacity: 0 }} 
-                      whileHover={{ y: 0, opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-xl font-bold mb-2 text-center"
-                    >
-                      {item.title}
-                    </motion.h3>
-                    <div className="flex flex-wrap justify-center gap-2 mb-3">
-                      {item.category.map(cat => (
-                        <span key={cat} className="text-xs px-2 py-1 bg-primary/40 rounded-full">
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
-                    <motion.a
-                      href={item.link}
-                      whileHover={{ scale: 1.1 }}
-                      className="flex items-center gap-1 text-sm font-medium bg-white/20 px-3 py-1 rounded-full hover:bg-white/30 transition-colors"
-                    >
-                      View Project <ExternalLink size={14} />
-                    </motion.a>
-                  </div>
-                </motion.div>
+                  item={item}
+                  rowSpan={getRowSpan(item)}
+                />
               ))}
             </AnimatePresence>
           </motion.div>
         </div>
-        
-        {/* View More Button */}
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            View All Projects
-          </Button>
-        </div>
       </div>
       
       {/* Bottom wave divider */}
-      <SectionDivider type="bottom" color="fill-muted/25" />
+      <SectionDivider type="bottom" color="fill-background" />
     </section>
   );
-} 
+}
+
+// Separate memoized component for portfolio cards
+interface PortfolioCardProps {
+  item: PortfolioItem;
+  rowSpan: number;
+}
+
+const PortfolioCard = ({ item, rowSpan }: PortfolioCardProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+  // Memoized card styles
+  const cardStyles = useMemo(() => ({
+    gridRowEnd: `span ${rowSpan}`,
+    aspectRatio: `${item.width} / ${item.height}`
+  }), [rowSpan, item.width, item.height]);
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ duration: 0.4, ease: "easeOut" }} // Faster transition
+      className="group cursor-pointer relative overflow-hidden rounded-lg shadow-md"
+      style={cardStyles}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Optimized Image */}
+      <motion.div
+        className="w-full h-full relative"
+        whileHover={{ scale: 1.05 }} // Reduced scale for better performance
+        transition={{ duration: 0.3 }}
+      >
+        <OptimizedImage
+          src={item.imageUrl}
+          alt={item.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          priority={item.id <= 3} // Priority load for first 3 items
+        />
+      </motion.div>
+      
+      {/* Optimized Overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.2 }} // Faster transition
+        className="absolute inset-0 bg-black/60 flex items-center justify-center"
+      >
+        <div className="text-center text-white p-4">
+          <motion.h3
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
+            className="text-lg font-semibold mb-2"
+          >
+            {item.title}
+          </motion.h3>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2, delay: 0.15 }}
+            className="flex flex-wrap gap-2 justify-center"
+          >
+            {item.category.map((cat, i) => (
+              <span
+                key={i}
+                className="px-2 py-1 bg-white/20 rounded-full text-xs"
+              >
+                {cat}
+              </span>
+            ))}
+          </motion.div>
+          <motion.a
+            href={item.link}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2, delay: 0.2 }}
+            className="inline-block mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+            onClick={(e) => e.preventDefault()} // Prevent navigation for demo
+          >
+            View Project
+          </motion.a>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}; 

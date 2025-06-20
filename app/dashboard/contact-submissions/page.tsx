@@ -1,58 +1,152 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRequiredRole } from '@/lib/useSession';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Search, Filter, Trash2, Eye, Mail, Archive, MessageSquare } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Building, 
-  Tag, 
-  MessageCircle,
-  CheckCircle,
-  Archive,
-  RefreshCcw,
-  Loader2,
-  Trash2,
-  Filter,
-  Search,
-  X
-} from 'lucide-react';
-// import { format } from 'date-fns';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useRequiredRole } from '@/components/auth/AdminProtection';
+import { memoryOptimization } from '@/lib/performance';
 
-type ContactSubmission = {
+// Type definitions
+interface ContactSubmission {
   id: string;
   name: string;
   email: string;
-  phoneNumber: string;
-  companyName: string | null;
-  country: string;
+  phone: string;
+  companyName?: string;
   services: string[];
+  budget: string;
+  country: string;
   message: string;
   status: 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED';
   createdAt: string;
   updatedAt: string;
-};
+}
+
+// Debounced search hook
+function useDebounced<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 export default function ContactSubmissionsPage() {
   const { hasRole } = useRequiredRole('ADMIN');
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
-  const [filteredSubmissions, setFilteredSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED'>('ALL');
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+
+  // Debounced search term for performance
+  const debouncedSearchTerm = useDebounced(searchTerm, 300);
+
+  // Memoized filtering function
+  const filteredSubmissions = useMemo(() => {
+    let filtered = submissions;
+
+    // Filter by search term
+    if (debouncedSearchTerm) {
+      const searchLower = debouncedSearchTerm.toLowerCase();
+      filtered = filtered.filter(sub => 
+        sub.name.toLowerCase().includes(searchLower) ||
+        sub.email.toLowerCase().includes(searchLower) ||
+        sub.companyName?.toLowerCase().includes(searchLower) ||
+        sub.country.toLowerCase().includes(searchLower) ||
+        sub.message.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filter by status
+    if (statusFilter !== 'ALL') {
+      filtered = filtered.filter(sub => sub.status === statusFilter);
+    }
+
+    return filtered;
+  }, [submissions, debouncedSearchTerm, statusFilter]);
+
+  // Memoized status counts
+  const statusCounts = useMemo(() => {
+    return submissions.reduce((counts, sub) => {
+      counts[sub.status] = (counts[sub.status] || 0) + 1;
+      return counts;
+    }, {} as Record<string, number>);
+  }, [submissions]);
+
+  // Memoized handlers
+  const handleStatusChange = useCallback((newStatus: typeof statusFilter) => {
+    setStatusFilter(newStatus);
+  }, []);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setSearchTerm('');
+    setStatusFilter('ALL');
+  }, []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleteLoading(id);
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete submission');
+      }
+
+      setSubmissions(prev => prev.filter(sub => sub.id !== id));
+    } catch (error) {
+      console.error('Error deleting submission:', error);
+      alert('Failed to delete submission. Please try again.');
+    } finally {
+      setDeleteLoading(null);
+    }
+  }, []);
+
+  const updateStatus = useCallback(async (id: string, newStatus: ContactSubmission['status']) => {
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+
+      setSubmissions(prev =>
+        prev.map(sub =>
+          sub.id === id ? { ...sub, status: newStatus } : sub
+        )
+      );
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status. Please try again.');
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchSubmissions() {
@@ -72,7 +166,7 @@ export default function ContactSubmissionsPage() {
               fetch(`/api/contact/${sub.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'READ' })
+                body: JSON.stringify({ status: 'read' })
               })
             )
           );
@@ -80,7 +174,7 @@ export default function ContactSubmissionsPage() {
           // Update local state
           setSubmissions(prev => 
             prev.map(sub => 
-              sub.status === 'NEW' ? { ...sub, status: 'READ' as const } : sub
+              sub.status === 'NEW' ? { ...sub, status: 'read' as const } : sub
             )
           );
         }
@@ -98,191 +192,50 @@ export default function ContactSubmissionsPage() {
     }
   }, [hasRole]);
 
-  // Filter submissions based on search term and status
-  useEffect(() => {
-    let filtered = submissions;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(sub => 
-        sub.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sub.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sub.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sub.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sub.message.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by status
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(sub => sub.status === statusFilter);
-    }
-
-    setFilteredSubmissions(filtered);
-  }, [submissions, searchTerm, statusFilter]);
-
-  const updateStatus = async (id: string, status: 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED') => {
-    try {
-      console.log('Updating status:', { id, status }); // Debug log
-      const response = await fetch(`/api/contact/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', errorText);
-        throw new Error(`Failed to update status: ${response.status} ${errorText}`);
-      }
-
-      const updatedSubmission = await response.json();
-      console.log('Status updated successfully:', updatedSubmission); // Debug log
-
-      // Update local state
-      setSubmissions(prev => 
-        prev.map(sub => 
-          sub.id === id ? { ...sub, status, updatedAt: new Date().toISOString() } : sub
-        )
-      );
-    } catch (err) {
-      console.error('Error updating status:', err);
-      // Show user-friendly error
-      setError(`Failed to update status: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    }
-  };
-
-  const deleteSubmission = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this contact submission? This action cannot be undone.')) {
-      return;
-    }
-
-    setDeleteLoading(id);
-    try {
-      const response = await fetch(`/api/contact/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to delete submission: ${response.status} ${errorText}`);
-      }
-
-      // Remove from local state
-      setSubmissions(prev => prev.filter(sub => sub.id !== id));
-    } catch (err) {
-      console.error('Error deleting submission:', err);
-      setError(`Failed to delete submission: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setDeleteLoading(null);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'NEW':
-        return <Badge className="bg-blue-500">New</Badge>;
-      case 'READ':
-        return <Badge className="bg-green-500">Read</Badge>;
-      case 'REPLIED':
-        return <Badge className="bg-purple-500">Replied</Badge>;
-      case 'ARCHIVED':
-        return <Badge variant="outline" className="text-gray-500">Archived</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
-  const refreshData = () => {
-    setLoading(true);
-    setError(null);
-    fetch('/api/contact')
-      .then(res => res.json())
-      .then(data => {
-        setSubmissions(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error refreshing submissions:', err);
-        setError('Failed to refresh data');
-        setLoading(false);
-      });
-  };
-
   if (!hasRole) {
+    return null;
+  }
+
+  if (error) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <div className="text-center">
-          <Mail className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-          <p className="text-muted-foreground">
-            You need admin privileges to access contact submissions.
-          </p>
-        </div>
-      </div>
+      <Card className="bg-red-50 border-red-200">
+        <CardContent className="pt-6">
+          <p className="text-red-600">{error}</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
-      >
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-orange-800">Contact Submissions</h1>
-          <p className="text-muted-foreground mt-2">
-            View and manage contact form submissions from your website
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Contact Submissions</h1>
+          <p className="text-gray-600 mt-2">Manage and respond to contact form submissions</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button 
-            variant="outline" 
-            onClick={refreshData}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCcw className="mr-2 h-4 w-4" />
-            )}
-            Refresh
-          </Button>
-        </div>
-      </motion.div>
+      </div>
 
       {/* Filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 rounded-lg"
+        transition={{ duration: 0.5 }}
+        className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-6 rounded-lg shadow"
       >
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search by name, email, company, country, or message..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            {searchTerm && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Search submissions..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="pl-10"
+          />
         </div>
+
+        {/* Status Filter */}
         <div className="flex gap-2">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-500" />
@@ -294,13 +247,13 @@ export default function ContactSubmissionsPage() {
                 key={status}
                 variant={statusFilter === status ? "default" : "outline"}
                 size="sm"
-                onClick={() => setStatusFilter(status)}
+                onClick={() => handleStatusChange(status)}
                 className="text-xs"
               >
-                                 {status === 'ALL' ? 'All' : status === 'READ' ? 'Read' : status}
+                {status === 'ALL' ? 'All' : status === 'read' ? 'Read' : status}
                 {status !== 'ALL' && (
                   <Badge variant="secondary" className="ml-1 text-xs">
-                    {submissions.filter(sub => sub.status === status).length}
+                    {statusCounts[status] || 0}
                   </Badge>
                 )}
               </Button>
@@ -314,31 +267,20 @@ export default function ContactSubmissionsPage() {
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span>
             Showing {filteredSubmissions.length} of {submissions.length} submissions
-            {searchTerm && ` for "${searchTerm}"`}
+            {debouncedSearchTerm && ` for "${debouncedSearchTerm}"`}
             {statusFilter !== 'ALL' && ` with status "${statusFilter}"`}
           </span>
-          {(searchTerm || statusFilter !== 'ALL') && (
+          {(debouncedSearchTerm || statusFilter !== 'ALL') && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('ALL');
-              }}
+              onClick={clearFilters}
               className="text-xs"
             >
               Clear filters
             </Button>
           )}
         </div>
-      )}
-
-      {error && (
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="pt-6">
-            <p className="text-red-600">{error}</p>
-          </CardContent>
-        </Card>
       )}
 
       {loading ? (
@@ -357,164 +299,158 @@ export default function ContactSubmissionsPage() {
           className="space-y-4"
         >
           {filteredSubmissions.map((submission) => (
-            <Card
+            <SubmissionCard
               key={submission.id}
-              className={`overflow-hidden transition-all duration-200 ${
-                submission.status === 'ARCHIVED' ? 'opacity-70' : ''
-              } ${submission.status === 'NEW' ? 'border-blue-300 shadow-sm shadow-blue-100' : ''}`}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl">{submission.name}</CardTitle>
-                    <CardDescription>
-                      {new Date(submission.createdAt).toLocaleString()}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(submission.status)}
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          Update Status
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-2" align="end">
-                        <div className="flex flex-col space-y-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="justify-start"
-                            onClick={() => updateStatus(submission.id, 'READ')}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                            Mark as Read
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="justify-start"
-                            onClick={() => updateStatus(submission.id, 'REPLIED')}
-                          >
-                            <MessageCircle className="mr-2 h-4 w-4 text-purple-500" />
-                            Mark as Replied
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="justify-start"
-                            onClick={() => updateStatus(submission.id, 'ARCHIVED')}
-                          >
-                            <Archive className="mr-2 h-4 w-4 text-gray-500" />
-                            Archive
-                          </Button>
-                          <hr className="my-1" />
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => deleteSubmission(submission.id)}
-                            disabled={deleteLoading === submission.id}
-                          >
-                            {deleteLoading === submission.id ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="mr-2 h-4 w-4" />
-                            )}
-                            Delete
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm">
-                      <Mail className="h-4 w-4 mr-2 text-gray-500" />
-                      <a 
-                        href={`mailto:${submission.email}`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {submission.email}
-                      </a>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <Phone className="h-4 w-4 mr-2 text-gray-500" />
-                      <a 
-                        href={`tel:${submission.phoneNumber}`}
-                        className="hover:underline"
-                      >
-                        {submission.phoneNumber}
-                      </a>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                      <span>{submission.country}</span>
-                    </div>
-                    {submission.companyName && (
-                      <div className="flex items-center text-sm">
-                        <Building className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>{submission.companyName}</span>
-                      </div>
-                    )}
-                    <div className="flex items-start text-sm">
-                      <Tag className="h-4 w-4 mr-2 mt-1 text-gray-500" />
-                      <div className="flex flex-wrap gap-1">
-                        {submission.services.map((service, i) => (
-                          <Badge key={i} variant="secondary" className="bg-gray-100">
-                            {service}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm border-l pl-4">
-                    <h4 className="font-medium mb-2">Message:</h4>
-                    <p className="whitespace-pre-wrap text-gray-600">
-                      {submission.message}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              submission={submission}
+              onDelete={handleDelete}
+              onUpdateStatus={updateStatus}
+              deleteLoading={deleteLoading === submission.id}
+            />
           ))}
         </motion.div>
       ) : (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <Mail className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            {submissions.length === 0 ? (
-              <>
-                <p className="text-lg text-gray-500">No contact submissions yet</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Submissions will appear here once visitors use your contact form
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg text-gray-500">No submissions match your filters</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Try adjusting your search terms or status filter
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setStatusFilter('ALL');
-                  }}
-                  className="mt-3"
-                >
-                  Clear all filters
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-12"
+        >
+          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No submissions found</h3>
+          <p className="text-gray-500">
+            {debouncedSearchTerm || statusFilter !== 'ALL' 
+              ? 'Try adjusting your filters to see more submissions.'
+              : 'No contact submissions have been received yet.'}
+          </p>
+        </motion.div>
       )}
     </div>
   );
-} 
+}
+
+// Optimized submission card component
+interface SubmissionCardProps {
+  submission: ContactSubmission;
+  onDelete: (id: string) => void;
+  onUpdateStatus: (id: string, status: ContactSubmission['status']) => void;
+  deleteLoading: boolean;
+}
+
+const SubmissionCard = ({ submission, onDelete, onUpdateStatus, deleteLoading }: SubmissionCardProps) => {
+  const formatDate = useMemo(() => {
+    return new Date(submission.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }, [submission.createdAt]);
+
+  const statusColor = useMemo(() => {
+    const colors = {
+      'NEW': 'bg-blue-100 text-blue-800',
+      'read': 'bg-gray-100 text-gray-800',
+      'REPLIED': 'bg-green-100 text-green-800',
+      'ARCHIVED': 'bg-yellow-100 text-yellow-800'
+    };
+    return colors[submission.status] || colors['read'];
+  }, [submission.status]);
+
+  return (
+    <Card className={`overflow-hidden transition-all duration-200 ${
+      submission.status === 'ARCHIVED' ? 'opacity-70' : ''
+    } ${submission.status === 'NEW' ? 'border-blue-300 shadow-sm shadow-blue-100' : ''}`}>
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              {submission.name}
+              {submission.companyName && (
+                <span className="text-gray-500 font-normal"> • {submission.companyName}</span>
+              )}
+            </CardTitle>
+            <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
+              <span className="flex items-center gap-1">
+                <Mail className="h-4 w-4" />
+                {submission.email}
+              </span>
+              <span>{submission.country}</span>
+              <span>{formatDate}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge className={statusColor}>
+              {submission.status === 'read' ? 'Read' : submission.status}
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {/* Services and Budget */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm font-medium text-gray-700">Services:</span>
+          {submission.services.map((service, index) => (
+            <Badge key={index} variant="outline" className="text-xs">
+              {service}
+            </Badge>
+          ))}
+          <Badge variant="secondary" className="text-xs ml-2">
+            Budget: {submission.budget}
+          </Badge>
+        </div>
+
+        {/* Message */}
+        <div>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {submission.message}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex gap-2">
+            {submission.status !== 'REPLIED' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onUpdateStatus(submission.id, 'REPLIED')}
+                className="text-xs"
+              >
+                <Mail className="h-3 w-3 mr-1" />
+                Mark as Replied
+              </Button>
+            )}
+            
+            {submission.status !== 'ARCHIVED' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onUpdateStatus(submission.id, 'ARCHIVED')}
+                className="text-xs"
+              >
+                <Archive className="h-3 w-3 mr-1" />
+                Archive
+              </Button>
+            )}
+          </div>
+
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => onDelete(submission.id)}
+            disabled={deleteLoading}
+            className="text-xs"
+          >
+            {deleteLoading ? (
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+            ) : (
+              <Trash2 className="h-3 w-3 mr-1" />
+            )}
+            Delete
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}; 
