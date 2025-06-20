@@ -28,7 +28,11 @@ function AdminLoginForm() {
       if (result?.error) {
         setError('Invalid credentials. Please try again.');
       } else if (result?.ok) {
-        router.push(callbackUrl);
+        setError(null);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       console.error('Sign in error:', error);

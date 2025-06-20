@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationBell from '@/components/dashboard/NotificationBell';
+import ClientOnly from '@/components/ClientOnly';
 import { 
   Card, 
   CardContent, 
@@ -27,6 +28,27 @@ import {
   Bell,
   Zap
 } from 'lucide-react';
+
+// Loading skeleton component
+const LoadingSkeleton = () => (
+  <div className="p-6 space-y-8 max-w-7xl mx-auto animate-pulse">
+    {/* Header skeleton */}
+    <div className="rounded-2xl bg-gray-200 h-48"></div>
+    
+    {/* Stats skeleton */}
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="bg-gray-200 rounded-lg h-32"></div>
+      ))}
+    </div>
+    
+    {/* Content skeleton */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="bg-gray-200 rounded-lg h-64"></div>
+      <div className="lg:col-span-2 bg-gray-200 rounded-lg h-64"></div>
+    </div>
+  </div>
+);
 
 // Simplified Stats Card Component
 const StatsCard = ({ 
@@ -152,12 +174,38 @@ const ActivityItem = ({
 );
 
 export default function DashboardPage() {
-  const { session } = useSession();
+  const { session, isLoading, isAuthenticated } = useSession();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { notifications, refreshNotifications } = useNotifications();
+
+  // Show loading spinner while session is loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch dashboard data
   const fetchDashboardStats = async () => {
@@ -184,20 +232,23 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // Initial data fetch
-    fetchDashboardStats();
-    
-    // Update time every minute
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-    
-    // Refresh dashboard data every 5 minutes
-    const dataRefreshTimer = setInterval(fetchDashboardStats, 5 * 60 * 1000);
+    // Only fetch data if we have a session
+    if (session) {
+      // Initial data fetch
+      fetchDashboardStats();
+      
+      // Update time every minute
+      const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+      
+      // Refresh dashboard data every 5 minutes
+      const dataRefreshTimer = setInterval(fetchDashboardStats, 5 * 60 * 1000);
 
-    return () => {
-      clearInterval(timer);
-      clearInterval(dataRefreshTimer);
-    };
-  }, []);
+      return () => {
+        clearInterval(timer);
+        clearInterval(dataRefreshTimer);
+      };
+    }
+  }, [session]); // Add session as dependency
 
   // Use real data from API or fallback to loading/default values
   const stats = dashboardStats ? [
@@ -311,8 +362,14 @@ export default function DashboardPage() {
     }
   ];
 
+  // Show loading skeleton while data is being fetched
+  if (loading && !dashboardStats) {
+    return <LoadingSkeleton />;
+  }
+
   return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
+    <ClientOnly>
+      <div className="p-6 space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -573,5 +630,6 @@ export default function DashboardPage() {
         </motion.section>
       </div>
     </div>
+    </ClientOnly>
   );
 }
