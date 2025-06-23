@@ -9,7 +9,7 @@ import useWindowSize from '@/lib/useWindowSize';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 
 // Portfolio item types
-type Category = 'All' | 'Web' | 'Mobile' | 'SaaS';
+type Category = 'All' | 'Digital Marketing' | 'Local SEO' | 'Paid Ads' | 'Web Development';
 interface PortfolioItem {
   id: number;
   title: string;
@@ -21,13 +21,13 @@ interface PortfolioItem {
   span?: number; // Grid span
 }
 
-// Optimized portfolio data with better image URLs and reduced size
+// Real portfolio data from Nexora's actual projects
 const portfolioItems: PortfolioItem[] = [
   {
     id: 1,
-    title: "Modern E-commerce Website",
-    category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/26/600/450?auto=format&fit=crop",
+    title: "Local Saree Shop Social Media Growth",
+    category: ["Digital Marketing"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/Screenshot_2025-06-20_145616.png",
     link: "#",
     width: 600,
     height: 450,
@@ -35,29 +35,29 @@ const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 2,
-    title: "Mobile Banking App",
-    category: ["Mobile"],
-    imageUrl: "https://picsum.photos/id/96/600/900?auto=format&fit=crop",
+    title: "YouTube Channel Growth Strategy",
+    category: ["Digital Marketing"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/Screenshot_2025-06-18_153012.png",
     link: "#",
     width: 600,
-    height: 900,
-    span: 2
-  },
-  {
-    id: 3,
-    title: "Project Management SaaS",
-    category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/42/600/600?auto=format&fit=crop",
-    link: "#",
-    width: 600,
-    height: 600,
+    height: 300,
     span: 1
   },
   {
+    id: 3,
+    title: "Google My Business Optimization",
+    category: ["Local SEO"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/1000032364.png",
+    link: "#",
+    width: 600,
+    height: 600,
+    span: 2
+  },
+  {
     id: 4,
-    title: "Health Tracking Mobile App",
-    category: ["Mobile"],
-    imageUrl: "https://picsum.photos/id/64/600/750?auto=format&fit=crop",
+    title: "Local Business SEO Success",
+    category: ["Local SEO"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/1000032369.png",
     link: "#",
     width: 600,
     height: 750,
@@ -65,9 +65,9 @@ const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 5,
-    title: "AI Content Generator",
-    category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/91/600/450?auto=format&fit=crop",
+    title: "Google Ads Campaign Success",
+    category: ["Paid Ads"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/1000032358.png",
     link: "#",
     width: 600,
     height: 450,
@@ -75,9 +75,9 @@ const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 6,
-    title: "Real Estate Finder App",
-    category: ["Mobile", "SaaS"],
-    imageUrl: "https://picsum.photos/id/239/600/675?auto=format&fit=crop",
+    title: "Online Course Platform",
+    category: ["Web Development"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/1000032361.jpg",
     link: "#",
     width: 600,
     height: 675,
@@ -85,9 +85,9 @@ const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 7,
-    title: "Portfolio Website Template",
-    category: ["Web"],
-    imageUrl: "https://picsum.photos/id/180/600/450?auto=format&fit=crop",
+    title: "Blog Website Dashboard",
+    category: ["Web Development"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/1000032363.png",
     link: "#",
     width: 600,
     height: 450,
@@ -95,9 +95,9 @@ const portfolioItems: PortfolioItem[] = [
   },
   {
     id: 8,
-    title: "Accounting Dashboard SaaS",
-    category: ["Web", "SaaS"],
-    imageUrl: "https://picsum.photos/id/106/600/525?auto=format&fit=crop",
+    title: "Gaming PC Landing Page",
+    category: ["Web Development"],
+    imageUrl: "/nexora_notion_site/Nexora Portfolio_files/1000032362.jpg",
     link: "#",
     width: 600,
     height: 525,
@@ -168,7 +168,7 @@ export default function PortfolioGrid() {
           
           {/* Filter Tabs - Optimized with memoized handlers */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {(['All', 'Web', 'Mobile', 'SaaS'] as Category[]).map((category) => (
+            {(['All', 'Digital Marketing', 'Local SEO', 'Paid Ads', 'Web Development'] as Category[]).map((category) => (
               <Button
                 key={category}
                 variant={activeCategory === category ? "default" : "outline"}

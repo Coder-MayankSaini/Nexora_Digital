@@ -2,70 +2,111 @@
 
 import { motion, useInView, Variants } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { ExternalLink, Github } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
-const projects = [
+// Define project interface
+interface Project {
+  id: number;
+  title: string;
+  category: string;
+  image: string;
+  description: string;
+  technologies: string[];
+  color: string;
+  height: string;
+  results?: string;
+}
+
+const projects: Project[] = [
   {
     id: 1,
-    title: 'E-Commerce Platform',
-    category: 'Web Development',
-    image: 'https://picsum.photos/400/300?random=1',
-    description: 'Modern online shopping experience with AI recommendations',
-    technologies: ['Next.js', 'TypeScript', 'Stripe'],
-    color: 'from-purple-600 to-blue-600',
-    height: 'h-64',
+    title: 'Local Saree Shop Social Media Growth',
+    category: 'Digital Marketing',
+    image: '/nexora_notion_site/Nexora Portfolio_files/Screenshot_2025-06-20_145616.png',
+    description: 'Helped a local saree shopkeeper grow his social media presence and increase sales through strategic content creation',
+    technologies: ['Social Media Strategy', 'Content Marketing', 'Video Marketing'],
+    color: 'from-green-600 to-teal-600',
+    height: 'h-96',
+    results: 'Increased online sales by 150%, improved brand visibility'
   },
   {
     id: 2,
-    title: 'Financial Dashboard',
+    title: 'YouTube Channel Growth Strategy',
     category: 'Digital Marketing',
-    image: 'https://picsum.photos/400/500?random=2',
-    description: 'Real-time analytics dashboard for financial data',
-    technologies: ['React', 'D3.js', 'TailwindCSS'],
-    color: 'from-blue-600 to-cyan-600',
-    height: 'h-96',
+    image: '/nexora_notion_site/Nexora Portfolio_files/Screenshot_2025-06-18_153012.png',
+    description: 'YouTube channel optimization showing dramatic before and after growth for client monetization and sales',
+    technologies: ['YouTube Optimization', 'Analytics', 'Content Strategy'],
+    color: 'from-green-600 to-teal-600',
+    height: 'h-64',
+    results: 'Significant subscriber growth, improved monetization'
   },
   {
     id: 3,
-    title: 'Mobile Banking App',
-    category: 'Web Development',
-    image: 'https://picsum.photos/400/400?random=3',
-    description: 'Secure banking app with biometric authentication',
-    technologies: ['React Native', 'Node.js', 'MongoDB'],
-    color: 'from-green-600 to-teal-600',
+    title: 'Google My Business Optimization',
+    category: 'GMB Optimization & Local SEO',
+    image: '/nexora_notion_site/Nexora Portfolio_files/1000032364.png',
+    description: 'GMB profile optimization with excellent ratings to rank above competition - achieved results within one week',
+    technologies: ['GMB Optimization', 'Local SEO', 'Review Management'],
+    color: 'from-blue-600 to-purple-600',
     height: 'h-80',
+    results: 'Top local ranking achieved in 1 week, improved customer trust'
   },
   {
     id: 4,
-    title: 'SaaS Platform',
-    category: 'Paid Advertising',
-    image: 'https://picsum.photos/400/350?random=4',
-    description: 'Complete SaaS solution for project management',
-    technologies: ['Vue.js', 'Laravel', 'PostgreSQL'],
-    color: 'from-pink-600 to-purple-600',
-    height: 'h-72',
+    title: 'Local Business SEO Success',
+    category: 'GMB Optimization & Local SEO',
+    image: '/nexora_notion_site/Nexora Portfolio_files/1000032369.png',
+    description: 'Complete website SEO and Google My Business optimization to achieve top local rankings',
+    technologies: ['Website SEO', 'Local SEO', 'GMB Optimization'],
+    color: 'from-blue-600 to-purple-600',
+    height: 'h-88',
+    results: 'Achieved top local search rankings, increased organic traffic'
   },
   {
     id: 5,
-    title: 'Healthcare Portal',
-    category: 'GMB Optimization & Local SEO',
-    image: 'https://picsum.photos/400/450?random=5',
-    description: 'Patient management system with telemedicine features',
-    technologies: ['Angular', 'Express', 'MySQL'],
-    color: 'from-orange-600 to-red-600',
+    title: 'Google Ads Campaign Success',
+    category: 'Paid Advertising',
+    image: '/nexora_notion_site/Nexora Portfolio_files/1000032358.png',
+    description: 'Google Ads campaign optimization that improved brand visibility and significantly boosted product sales',
+    technologies: ['Google Ads', 'Campaign Optimization', 'Performance Analytics'],
+    color: 'from-purple-600 to-pink-600',
     height: 'h-88',
+    results: 'Improved brand visibility, significant sales increase'
   },
   {
     id: 6,
-    title: 'AI Content Creator',
-    category: 'Digital Marketing',
-    image: 'https://picsum.photos/400/320?random=6',
-    description: 'Advanced content generation platform with intelligent features',
-    technologies: ['Python', 'React', 'Node.js'],
-    color: 'from-indigo-600 to-purple-600',
-    height: 'h-68',
+    title: 'Online Course Platform',
+    category: 'Web Development',
+    image: '/nexora_notion_site/Nexora Portfolio_files/1000032361.jpg',
+    description: 'Custom e-learning website with online payment integration for course sales and student management',
+    technologies: ['Next.js', 'Payment Integration', 'LMS Features'],
+    color: 'from-blue-600 to-cyan-600',
+    height: 'h-96',
+    results: 'Streamlined course sales, improved student experience'
   },
+  {
+    id: 7,
+    title: 'Blog Website Dashboard',
+    category: 'Web Development',
+    image: '/nexora_notion_site/Nexora Portfolio_files/1000032363.png',
+    description: 'Professional blog website with comprehensive dashboard for content management and analytics',
+    technologies: ['Content Management', 'Dashboard UI', 'Analytics'],
+    color: 'from-blue-600 to-cyan-600',
+    height: 'h-72',
+    results: 'Enhanced content management, better user engagement'
+  },
+  {
+    id: 8,
+    title: 'Gaming PC Landing Page',
+    category: 'Web Development',
+    image: '/nexora_notion_site/Nexora Portfolio_files/1000032362.jpg',
+    description: 'High-converting landing page designed for gaming PC sales with optimized user experience',
+    technologies: ['Landing Page Design', 'Conversion Optimization', 'Responsive Design'],
+    color: 'from-blue-600 to-cyan-600',
+    height: 'h-80',
+    results: 'Optimized conversion rates, professional presentation'
+  }
 ];
 
 const categories = ['All', 'GMB Optimization & Local SEO', 'Digital Marketing', 'Paid Advertising', 'Web Development'];
@@ -213,6 +254,13 @@ export default function AnimatedPortfolio() {
                     <h3 className="text-2xl font-bold">{project.title}</h3>
                     <p className="text-sm opacity-90 line-clamp-2">{project.description}</p>
                     
+                    {/* Results */}
+                    {project.results && (
+                      <div className="mt-3 px-3 py-1 bg-white/30 backdrop-blur-sm rounded-lg">
+                        <p className="text-xs font-semibold text-white">{project.results}</p>
+                      </div>
+                    )}
+                    
                     {/* Technologies */}
                     <div className="flex flex-wrap gap-2 mt-3">
                       {project.technologies.map((tech, i) => (
@@ -228,40 +276,11 @@ export default function AnimatedPortfolio() {
                       ))}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 mt-4">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        View Project
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
-                      >
-                        <Github className="w-4 h-4" />
-                        Source
-                      </motion.button>
-                    </div>
+
                   </div>
                 </motion.div>
 
-                {/* Corner Badge */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{
-                    opacity: hoveredProject === project.id ? 1 : 0,
-                    scale: hoveredProject === project.id ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute top-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
-                >
-                  <span className="text-white text-lg">→</span>
-                </motion.div>
+
               </motion.div>
 
               {/* Floating Elements */}
