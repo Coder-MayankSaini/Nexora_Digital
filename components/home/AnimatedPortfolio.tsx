@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useInView, Variants } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -14,7 +14,6 @@ interface Project {
   description: string;
   technologies: string[];
   color: string;
-  height: string;
   results?: string;
 }
 
@@ -27,7 +26,6 @@ const projects: Project[] = [
     description: 'Helped a local saree shopkeeper grow his social media presence and increase sales through strategic content creation',
     technologies: ['Social Media Strategy', 'Content Marketing', 'Video Marketing'],
     color: 'from-green-600 to-teal-600',
-    height: 'h-80',
     results: 'Increased online sales by 150%, improved brand visibility'
   },
   {
@@ -38,7 +36,6 @@ const projects: Project[] = [
     description: 'YouTube channel optimization showing dramatic before and after growth for client monetization and sales',
     technologies: ['YouTube Optimization', 'Analytics', 'Content Strategy'],
     color: 'from-green-600 to-teal-600',
-    height: 'h-80',
     results: 'Significant subscriber growth, improved monetization'
   },
   {
@@ -49,7 +46,6 @@ const projects: Project[] = [
     description: 'GMB profile optimization with excellent ratings to rank above competition - achieved results within one week',
     technologies: ['GMB Optimization', 'Local SEO', 'Review Management'],
     color: 'from-blue-600 to-purple-600',
-    height: 'h-80',
     results: 'Top local ranking achieved in 1 week, improved customer trust'
   },
   {
@@ -60,7 +56,6 @@ const projects: Project[] = [
     description: 'Complete website SEO and Google My Business optimization to achieve top local rankings',
     technologies: ['Website SEO', 'Local SEO', 'GMB Optimization'],
     color: 'from-blue-600 to-purple-600',
-    height: 'h-80',
     results: 'Achieved top local search rankings, increased organic traffic'
   },
   {
@@ -71,7 +66,6 @@ const projects: Project[] = [
     description: 'Google Ads campaign optimization that improved brand visibility and significantly boosted product sales',
     technologies: ['Google Ads', 'Campaign Optimization', 'Performance Analytics'],
     color: 'from-purple-600 to-pink-600',
-    height: 'h-80',
     results: 'Improved brand visibility, significant sales increase'
   },
   {
@@ -82,7 +76,6 @@ const projects: Project[] = [
     description: 'Custom e-learning website with online payment integration for course sales and student management',
     technologies: ['Next.js', 'Payment Integration', 'LMS Features'],
     color: 'from-blue-600 to-cyan-600',
-    height: 'h-80',
     results: 'Streamlined course sales, improved student experience'
   },
   {
@@ -93,7 +86,6 @@ const projects: Project[] = [
     description: 'Professional blog website with comprehensive dashboard for content management and analytics',
     technologies: ['Content Management', 'Dashboard UI', 'Analytics'],
     color: 'from-blue-600 to-cyan-600',
-    height: 'h-80',
     results: 'Enhanced content management, better user engagement'
   },
   {
@@ -104,7 +96,6 @@ const projects: Project[] = [
     description: 'High-converting landing page designed for gaming PC sales with optimized user experience',
     technologies: ['Landing Page Design', 'Conversion Optimization', 'Responsive Design'],
     color: 'from-blue-600 to-cyan-600',
-    height: 'h-80',
     results: 'Optimized conversion rates, professional presentation'
   }
 ];
@@ -116,10 +107,55 @@ export default function AnimatedPortfolio() {
   const isInView = useInView(ref, { once: true, amount: 0.1 });
   const [activeCategory, setActiveCategory] = useState('All');
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<Project | null>(null);
+  const [showAllOnMobile, setShowAllOnMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const filteredProjects = activeCategory === 'All'
     ? projects
     : projects.filter(project => project.category === activeCategory);
+
+  // Limit projects on mobile
+  const displayedProjects = isMobile && !showAllOnMobile 
+    ? filteredProjects.slice(0, 2)
+    : filteredProjects;
+
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null);
+      }
+    };
+
+    if (selectedImage) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedImage]);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Reset showAllOnMobile when category changes
+  useEffect(() => {
+    setShowAllOnMobile(false);
+  }, [activeCategory]);
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -195,14 +231,14 @@ export default function AnimatedPortfolio() {
           ))}
         </motion.div>
 
-        {/* Portfolio Grid - Masonry Layout */}
+        {/* Portfolio Grid - Uniform Layout */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {filteredProjects.map((project, index) => (
+          {displayedProjects.map((project, index) => (
             <motion.div
               key={project.id}
               variants={itemVariants}
@@ -211,7 +247,7 @@ export default function AnimatedPortfolio() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className={cn("relative group cursor-pointer", project.height)}
+              className="relative group cursor-pointer aspect-[4/3] w-full"
               onMouseEnter={() => setHoveredProject(project.id)}
               onMouseLeave={() => setHoveredProject(null)}
             >
@@ -220,16 +256,21 @@ export default function AnimatedPortfolio() {
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
                 className="relative h-full rounded-2xl overflow-hidden shadow-lg"
+                onClick={() => setSelectedImage(project)}
               >
                 {/* Image */}
-                <motion.img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
+                <motion.div
+                  className="w-full h-full overflow-hidden"
                   initial={{ scale: 1 }}
                   animate={{ scale: hoveredProject === project.id ? 1.1 : 1 }}
                   transition={{ duration: 0.6 }}
-                />
+                >
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover object-center"
+                  />
+                </motion.div>
 
                 {/* Gradient Overlay */}
                 <motion.div
@@ -314,22 +355,116 @@ export default function AnimatedPortfolio() {
           ))}
         </motion.div>
 
-        {/* View All Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="text-center mt-16"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
+        {/* View All Button - Only show on mobile when not showing all */}
+        {isMobile && !showAllOnMobile && filteredProjects.length > 2 && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="text-center mt-16"
           >
-            View All Projects
-          </motion.button>
-        </motion.div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAllOnMobile(true)}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
+            >
+              View All Projects ({filteredProjects.length})
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Show Less Button - Only show on mobile when showing all */}
+        {isMobile && showAllOnMobile && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mt-16"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAllOnMobile(false)}
+              className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
+            >
+              Show Less
+            </motion.button>
+          </motion.div>
+        )}
       </div>
+
+      {/* Image Modal Popup */}
+      {selectedImage && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative max-w-4xl max-h-[90vh] w-full bg-white rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Image */}
+            <div className="relative">
+              <img
+                src={selectedImage.image}
+                alt={selectedImage.title}
+                className="w-full h-auto max-h-[70vh] object-contain"
+              />
+              
+              {/* Gradient Overlay for Content */}
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
+              )} />
+            </div>
+
+            {/* Content */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-blue-300">{selectedImage.category}</p>
+                <h3 className="text-2xl md:text-3xl font-bold">{selectedImage.title}</h3>
+                <p className="text-gray-200 leading-relaxed">{selectedImage.description}</p>
+                
+                {/* Results */}
+                {selectedImage.results && (
+                  <div className="mt-4 p-3 bg-white/20 backdrop-blur-sm rounded-lg">
+                    <p className="text-sm font-semibold text-green-300">🎯 {selectedImage.results}</p>
+                  </div>
+                )}
+                
+                {/* Technologies */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {selectedImage.technologies.map((tech, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </section>
   );
 }

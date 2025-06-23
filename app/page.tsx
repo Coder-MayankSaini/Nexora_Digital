@@ -218,8 +218,8 @@ function AboutSection() {
           >
             {/* Main image */}
             <motion.img 
-              src="https://picsum.photos/600/400?random=10" 
-              alt="About Us"
+              src="https://cloutly.com/blog/content/images/2023/02/Review-us-online--1-.jpg" 
+              alt="Digital Excellence and Client Reviews"
               className="rounded-2xl shadow-xl w-full h-auto"
               loading="lazy"
             />

@@ -68,7 +68,7 @@ export default function BlogPage() {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className="text-xl text-gray-300 mb-6"
           >
-            Insights, tutorials, and news from the Nexora team
+            Expert insights, strategies, and tips for digital marketing success
           </motion.p>
           
           <motion.div
@@ -84,47 +84,8 @@ export default function BlogPage() {
       <div className="container mx-auto px-4 py-16" ref={containerRef}>
         <SlideUp>
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 gap-8 mb-16">
-              {/* Featured post section */}
-              <FadeIn>
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-slate-900 dark:to-purple-900/30 p-8 rounded-2xl shadow-lg border border-purple-100 dark:border-purple-900/20">
-                  <h2 className="text-3xl font-bold mb-6 text-purple-900 dark:text-purple-300">Featured Post</h2>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="relative h-80 overflow-hidden rounded-xl">
-                      <motion.div 
-                        className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-600 absolute"
-                        whileHover={{ 
-                          scale: 1.05,
-                          transition: { duration: 0.3 }
-                        }}
-                      >
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-white text-lg font-medium">The Future of Web Development</span>
-                        </div>
-                      </motion.div>
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <div className="text-sm text-purple-600 dark:text-purple-300 mb-2">May 15, 2023</div>
-                      <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">The Future of Web Development: Trends to Watch in 2023</h3>
-                      <p className="text-gray-600 dark:text-gray-300 mb-6">
-                        Discover the cutting-edge technologies and approaches that are reshaping how we build websites and web applications.
-                        From AI-assisted development to new frameworks and tools, stay ahead of the curve.
-                      </p>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="self-start px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium rounded-full shadow-md hover:shadow-lg transition duration-300"
-                      >
-                        Read Article
-                      </motion.button>
-                    </div>
-                  </div>
-                </div>
-              </FadeIn>
-            </div>
-            
             <SlideUp delay={0.2}>
-              <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Latest Articles</h2>
+              <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">Latest Articles</h2>
             </SlideUp>
             
             <SlideUp delay={0.3}>

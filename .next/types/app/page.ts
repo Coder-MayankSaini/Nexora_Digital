@@ -1,4 +1,4 @@
-// File: C:\Users\workm\Desktop\NexoraWebsite\app\page.tsx
+// File: /Users/mac/Downloads/Nexora_Digital/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

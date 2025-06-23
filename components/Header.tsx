@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Favicon } from './ui/favicon';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
   const pathname = usePathname();
 
   // Handle scroll effect
@@ -25,16 +26,24 @@ export default function Header() {
   // Close menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
+    setIsServicesOpen(false);
   }, [pathname]);
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
     { href: '/blog', label: 'Blog' },
     { href: '/contact', label: 'Contact' },
   ];
 
+  const serviceLinks = [
+    { href: '/services/digital-marketing', label: 'Digital Marketing' },
+    { href: '/services/local-seo', label: 'Local SEO' },
+    { href: '/services/paid-advertising', label: 'Paid Advertising' },
+    { href: '/services/web-development', label: 'Web Development' },
+  ];
+
   const isActive = (path: string) => pathname === path;
+  const isServicesActive = () => pathname.startsWith('/services');
 
   return (
     <header
@@ -86,6 +95,77 @@ export default function Header() {
               }`}></span>
             </Link>
           ))}
+          
+          {/* Services Dropdown */}
+          <div 
+            className="relative group"
+            onMouseEnter={() => setIsServicesOpen(true)}
+            onMouseLeave={() => setIsServicesOpen(false)}
+          >
+            <button
+              className="flex items-center gap-1 relative"
+            >
+              <motion.span
+                className={`transition-colors font-medium text-sm uppercase tracking-wider ${
+                  isServicesActive()
+                    ? isScrolled
+                      ? 'text-purple-700'
+                      : 'text-white'
+                    : isScrolled
+                    ? 'text-gray-700 hover:text-purple-700'
+                    : 'text-white/90 hover:text-white'
+                }`}
+                whileHover={{ y: -2 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                Services
+              </motion.span>
+              <ChevronDown 
+                className={`w-4 h-4 transition-all duration-200 ${
+                  isServicesActive()
+                    ? isScrolled
+                      ? 'text-purple-700'
+                      : 'text-white'
+                    : isScrolled
+                    ? 'text-gray-700 group-hover:text-purple-700'
+                    : 'text-white/90 group-hover:text-white'
+                } ${isServicesOpen ? 'rotate-180' : ''}`}
+              />
+              <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-600 to-blue-500 transition-all duration-300 group-hover:w-full ${
+                isServicesActive() ? 'w-full' : ''
+              }`}></span>
+            </button>
+            
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {isServicesOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-lg border border-gray-100 py-2"
+                >
+                  {serviceLinks.map((service, index) => (
+                    <Link
+                      key={service.href}
+                      href={service.href}
+                      className="block px-4 py-3 text-gray-700 hover:text-purple-700 hover:bg-purple-50 transition-colors"
+                    >
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="block"
+                      >
+                        {service.label}
+                      </motion.span>
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -155,6 +235,38 @@ export default function Header() {
                   </Link>
                 </motion.div>
               ))}
+              
+              {/* Mobile Services Section */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: navLinks.length * 0.1 }}
+                className="border-t border-gray-200 pt-5"
+              >
+                <div className="mb-3">
+                  <span className={`text-lg font-medium ${isServicesActive() ? 'text-purple-700' : 'text-gray-700'}`}>
+                    Services
+                  </span>
+                  {isServicesActive() && (
+                    <motion.div
+                      className="absolute left-0 h-full w-1 bg-gradient-to-b from-purple-700 to-indigo-600 rounded-r-full"
+                      layoutId="activeMobileNavIndicator"
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                </div>
+                <div className="pl-4 space-y-3">
+                  {serviceLinks.map((service, index) => (
+                    <Link
+                      key={service.href}
+                      href={service.href}
+                      className="block py-2 text-gray-600 hover:text-purple-700 transition-colors"
+                    >
+                      {service.label}
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
             </nav>
           </motion.div>
         )}
