@@ -27,7 +27,7 @@ const projects: Project[] = [
     description: 'Helped a local saree shopkeeper grow his social media presence and increase sales through strategic content creation',
     technologies: ['Social Media Strategy', 'Content Marketing', 'Video Marketing'],
     color: 'from-green-600 to-teal-600',
-    height: 'h-96',
+    height: 'h-80',
     results: 'Increased online sales by 150%, improved brand visibility'
   },
   {
@@ -38,7 +38,7 @@ const projects: Project[] = [
     description: 'YouTube channel optimization showing dramatic before and after growth for client monetization and sales',
     technologies: ['YouTube Optimization', 'Analytics', 'Content Strategy'],
     color: 'from-green-600 to-teal-600',
-    height: 'h-64',
+    height: 'h-80',
     results: 'Significant subscriber growth, improved monetization'
   },
   {
@@ -60,7 +60,7 @@ const projects: Project[] = [
     description: 'Complete website SEO and Google My Business optimization to achieve top local rankings',
     technologies: ['Website SEO', 'Local SEO', 'GMB Optimization'],
     color: 'from-blue-600 to-purple-600',
-    height: 'h-88',
+    height: 'h-80',
     results: 'Achieved top local search rankings, increased organic traffic'
   },
   {
@@ -71,7 +71,7 @@ const projects: Project[] = [
     description: 'Google Ads campaign optimization that improved brand visibility and significantly boosted product sales',
     technologies: ['Google Ads', 'Campaign Optimization', 'Performance Analytics'],
     color: 'from-purple-600 to-pink-600',
-    height: 'h-88',
+    height: 'h-80',
     results: 'Improved brand visibility, significant sales increase'
   },
   {
@@ -82,7 +82,7 @@ const projects: Project[] = [
     description: 'Custom e-learning website with online payment integration for course sales and student management',
     technologies: ['Next.js', 'Payment Integration', 'LMS Features'],
     color: 'from-blue-600 to-cyan-600',
-    height: 'h-96',
+    height: 'h-80',
     results: 'Streamlined course sales, improved student experience'
   },
   {
@@ -93,7 +93,7 @@ const projects: Project[] = [
     description: 'Professional blog website with comprehensive dashboard for content management and analytics',
     technologies: ['Content Management', 'Dashboard UI', 'Analytics'],
     color: 'from-blue-600 to-cyan-600',
-    height: 'h-72',
+    height: 'h-80',
     results: 'Enhanced content management, better user engagement'
   },
   {
