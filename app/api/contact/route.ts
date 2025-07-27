@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendContactFormEmail } from '@/lib/email';
 
 export async function GET() {
   try {
@@ -52,6 +53,23 @@ export async function POST(request: NextRequest) {
         status: 'NEW',
       },
     });
+    
+    // Send email notification to marketing team
+    try {
+      await sendContactFormEmail({
+        name,
+        email,
+        phoneNumber,
+        companyName: body.companyName,
+        country,
+        services: Array.isArray(services) ? services : [],
+        message,
+      });
+      console.log('Email notification sent to marketing team');
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the entire request if email fails
+    }
     
     return NextResponse.json({ 
       success: true,
