@@ -4,7 +4,7 @@ import { sendContactFormEmail } from '@/lib/email';
 
 export async function GET() {
   try {
-    let submissions;
+    let submissions: any[] = [];
     let retries = 3;
     
     while (retries > 0) {
@@ -26,6 +26,11 @@ export async function GET() {
         // Wait a bit before retrying
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
+    }
+
+    // Ensure submissions is always an array
+    if (!submissions || !Array.isArray(submissions)) {
+      submissions = [];
     }
 
     // Parse services from JSON string to array
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Create contact submission in database with retry logic
-    let submission;
+    let submission: any = null;
     let retries = 3;
     
     while (retries > 0) {
@@ -88,6 +93,11 @@ export async function POST(request: NextRequest) {
         // Wait a bit before retrying
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
+    }
+    
+    // Ensure submission was created successfully
+    if (!submission) {
+      throw new Error('Failed to create contact submission');
     }
     
     // Send email notification to marketing team
