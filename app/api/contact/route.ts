@@ -4,11 +4,29 @@ import { sendContactFormEmail } from '@/lib/email';
 
 export async function GET() {
   try {
-    const submissions = await prisma.contactSubmission.findMany({
-      orderBy: {
-        createdAt: 'desc'
+    let submissions;
+    let retries = 3;
+    
+    while (retries > 0) {
+      try {
+        submissions = await prisma.contactSubmission.findMany({
+          orderBy: {
+            createdAt: 'desc'
+          }
+        });
+        break; // Success, exit retry loop
+      } catch (dbError: any) {
+        retries--;
+        console.log(`Database fetch attempt failed, retries left: ${retries}`, dbError.message);
+        
+        if (retries === 0) {
+          throw dbError; // Re-throw if all retries exhausted
+        }
+        
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    });
+    }
 
     // Parse services from JSON string to array
     const formattedSubmissions = submissions.map((submission: any) => ({
@@ -40,19 +58,37 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create contact submission in database
-    const submission = await prisma.contactSubmission.create({
-      data: {
-        name,
-        email,
-        phoneNumber,
-        companyName: body.companyName || null,
-        country,
-        services: Array.isArray(services) ? JSON.stringify(services) : JSON.stringify([]),
-        message,
-        status: 'NEW',
-      },
-    });
+    // Create contact submission in database with retry logic
+    let submission;
+    let retries = 3;
+    
+    while (retries > 0) {
+      try {
+        submission = await prisma.contactSubmission.create({
+          data: {
+            name,
+            email,
+            phoneNumber,
+            companyName: body.companyName || null,
+            country,
+            services: Array.isArray(services) ? JSON.stringify(services) : JSON.stringify([]),
+            message,
+            status: 'NEW',
+          },
+        });
+        break; // Success, exit retry loop
+      } catch (dbError: any) {
+        retries--;
+        console.log(`Database attempt failed, retries left: ${retries}`, dbError.message);
+        
+        if (retries === 0) {
+          throw dbError; // Re-throw if all retries exhausted
+        }
+        
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
     
     // Send email notification to marketing team
     try {
@@ -83,8 +119,8 @@ export async function POST(request: NextRequest) {
     
     if (error.code === 'P2002') {
       errorMessage = 'A submission with this email already exists';
-    } else if (error.code === 'P2025') {
-      errorMessage = 'Database connection failed';
+    } else if (error.code === 'P2025' || error.message?.includes('Server has closed the connection')) {
+      errorMessage = 'Database connection issue. Please try again in a moment.';
     } else if (error.message) {
       errorMessage = error.message;
     }

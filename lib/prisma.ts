@@ -10,6 +10,8 @@ export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     log: ['query', 'error', 'warn'],
+    // Better error handling for Neon.tech
+    errorFormat: 'pretty',
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma 
