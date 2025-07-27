@@ -77,8 +77,20 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (error: any) {
     console.error('Contact submission error:', error);
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to submit contact form';
+    
+    if (error.code === 'P2002') {
+      errorMessage = 'A submission with this email already exists';
+    } else if (error.code === 'P2025') {
+      errorMessage = 'Database connection failed';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to submit contact form' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

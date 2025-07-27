@@ -70,6 +70,7 @@ const services = [
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   
@@ -77,6 +78,7 @@ export default function ContactPage() {
   
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
+    setError(null);
     
     try {
       // Add selected services to form data
@@ -91,8 +93,10 @@ export default function ContactPage() {
         body: JSON.stringify(data),
       });
       
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to submit form');
+        throw new Error(responseData.error || 'Failed to submit form');
       }
       
       // Success
@@ -105,10 +109,10 @@ export default function ContactPage() {
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
       setIsSubmitting(false);
-      // Could also set an error state here to show an error message
+      setError(error.message || 'An error occurred while submitting the form');
     }
   };
 
@@ -159,6 +163,14 @@ export default function ContactPage() {
                     <CheckCircle className="h-5 w-5 mr-2" />
                     <AlertDescription>
                       Thank you for your message! We'll get back to you shortly.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+                
+                {error ? (
+                  <Alert className="bg-red-50 border-red-200 text-red-800 mb-6">
+                    <AlertDescription>
+                      {error}
                     </AlertDescription>
                   </Alert>
                 ) : null}
